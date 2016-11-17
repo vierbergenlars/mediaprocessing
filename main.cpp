@@ -7,6 +7,7 @@
 #include <QGraphicsSimpleTextItem>
 #include <QMainWindow>
 #include <cmath>
+#include "graphicstile.h"
 
 using namespace std;
 
@@ -30,17 +31,9 @@ int main(int argc, char *argv[])
         std::vector<std::unique_ptr<Tile>> tiles = w->createWorld(argv[1]);
 
         for(std::unique_ptr<Tile> &tile: tiles) {
-            QColor color;
-            if(isinf(tile->getValue())) {
-                // Use red for impassable areas
-                color = QColor(0xff, 0, 0);
-            } else {
-                int colorValue(tile->getValue()*0xff);
-                color = QColor(colorValue, colorValue, colorValue);
-            }
-            //QPen pen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
-            QPen pen(Qt::NoPen);
-            graphicsScene.addRect(tile->getXPos(), tile->getYPos(), 1, 1, pen, QBrush(color));
+            std::shared_ptr<const Tile> shared_tile = std::move(tile);
+            GraphicsTile* gtile = new GraphicsTile(shared_tile);
+            graphicsScene.addItem(gtile);
         }
 
 
@@ -60,7 +53,7 @@ int main(int argc, char *argv[])
                 // Special color for PEnemies
                 color = QColor(0, 0xff, 0xff);
             }
-            auto enemyEllipse = graphicsScene.addEllipse(shared_enemy->getXPos(), shared_enemy->getYPos(), 1, 1, pen, QBrush(color));
+            auto enemyEllipse = graphicsScene.addEllipse(shared_enemy->getXPos()*10, shared_enemy->getYPos()*10, 10, 10, pen, QBrush(color));
             QString enemyTextValue;
             if(penemy == nullptr) {
                 enemyTextValue = QString::number(shared_enemy->getValue());
@@ -78,7 +71,7 @@ int main(int argc, char *argv[])
             graphicsScene.addRect(enemyTextRect, QPen(Qt::black, 0));
         }
 
-        graphicsView.scale(20, 20);
+        //graphicsView.scale(20, 20);
 
     } catch(const QString &err) {
         std::cerr << err.toStdString() << std::endl;
