@@ -6,19 +6,70 @@
 #include <cassert>
 
 
+/**
+ * @brief A simple fixed-size matrix which allows read/write access to objects inside it.
+ *
+ * @tparam T Type of element contained in the matrix
+ *
+ */
 template<class T>
 class Matrix
 {
 public:
+    /**
+     * @brief Creates a new matrix with a fixed size
+     * @param rows The number of rows in the matrix
+     * @param cols The number of columns in the matrix
+     */
     Matrix(int rows, int cols);
+
+    /**
+     * @brief Creates a new matrix from a part of the matrix
+     * @param xStart Start row to copy to the new matrix
+     * @param yStart Start column to copy to the new matrix
+     * @param xEnd End row to copy to the new matrix
+     * @param yEnd End column to copy to the new matrix
+     * @return A new matrix comprising a part of the complete matrix
+     */
     Matrix<T> slice(int xStart, int yStart, int xEnd, int yEnd);
+
+    /**
+     * @brief Gets a list of all elements in the matrix
+     * @return A vector containing all elements present in the matrix
+     */
     std::vector<T> all() const;
 
-    void setRef(int x, int y, T& object);
-    void set(int x, int y, T object);
+    /**
+     * @brief Updates a cell in the matrix
+     * @param x Row position to place the element on
+     * @param y Column position to place the element on
+     * @param object The element to place in the matrix
+     */
+    void set(int x, int y, const T& object);
+
+    /**
+     * @brief Fetches a cell from the matrix
+     * @param x Row position to fetch the element from
+     * @param y Column position to fetch the element from
+     * @return The element at that position in the matrix
+     */
     T &get(int x, int y);
+
+    /**
+     * @brief Fetches a cell from the matrix
+     * @param x Row position to fetch the element from
+     * @param y Column position to fetch the element from
+     * @return The element at that position in the matrix
+     */
     const T &get(int x, int y) const;
+
+    /**
+     * @return The number of rows in this matrix
+     */
     int rows() const { return _rows; }
+    /**
+     * @return The number of columns in this matrix
+     */
     int cols() const { return _cols; }
 private:
     inline void __verify_offsets(int x, int y) const;
@@ -39,12 +90,12 @@ Matrix<T> Matrix<T>::slice(int xStart, int yStart, int xEnd, int yEnd)
 {
     __verify_offsets(xStart, yStart);
     __verify_offsets(xEnd, yEnd);
-    assert(xStart < xEnd);
-    assert(yStart < yEnd);
-    Matrix<T> matrix(xEnd-xStart, yEnd-yStart);
-    for(int i=xStart; i < xEnd; i++) {
-        for(int j=yStart; j < yEnd; j++) {
-            matrix.setRef(i-xStart, j-yStart, this->get(i, j));
+    assert(xStart <= xEnd);
+    assert(yStart <= yEnd);
+    Matrix<T> matrix(xEnd-xStart+1, yEnd-yStart+1);
+    for(int i=xStart; i <= xEnd; i++) {
+        for(int j=yStart; j <= yEnd; j++) {
+            matrix.set(i-xStart, j-yStart, this->get(i, j));
         }
     }
     return matrix;
@@ -72,18 +123,12 @@ const T& Matrix<T>::get(int x, int y) const
 }
 
 template<class T>
-void Matrix<T>::set(int x, int y, T object)
+void Matrix<T>::set(int x, int y, const T& object)
 {
     __verify_offsets(x, y);
     storage[x*_cols+y] = object;
 }
 
-template<class T>
-void Matrix<T>::setRef(int x, int y, T& object)
-{
-    __verify_offsets(x, y);
-    storage[x*_cols+y] = object;
-}
 
 template<class T>
 inline void Matrix<T>::__verify_offsets(int x, int y) const
