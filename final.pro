@@ -3,10 +3,13 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console c++11 debug
 CONFIG -= app_bundle
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    graphicstile.cpp \
+    worldcontroller.cpp \
+    mainwindow.cpp
 
 unix:!macx: LIBS += -L$$PWD/libworld.so/ -lworld
 
@@ -21,4 +24,8 @@ DISTFILES += \
 
 HEADERS += \
     libworld.so/world.h \
-    libworld.so/world_global.h
+    libworld.so/world_global.h \
+    graphicstile.h \
+    matrix.h \
+    worldcontroller.h \
+    mainwindow.h
