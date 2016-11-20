@@ -1,16 +1,22 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 #include <vector>
+#include <map>
 #include <iostream>
 #include <iterator>
 #include <cassert>
+#include <memory>
 
+template<class T>
+class MatrixView;
+
+template<class T>
+class MatrixIterator;
 
 /**
  * @brief A simple fixed-size matrix which allows read/write access to objects inside it.
  *
  * @tparam T Type of element contained in the matrix
- *
  */
 template<class T>
 class Matrix
@@ -21,130 +27,308 @@ public:
      * @param rows The number of rows in the matrix
      * @param cols The number of columns in the matrix
      */
-    Matrix(int rows, int cols);
+    Matrix(int rows, int cols):
+        _rows(rows), _cols(cols)
+    {
+
+    }
 
     /**
-     * @brief Creates a new matrix from a part of the matrix
-     * @param xStart Start row to copy to the new matrix
-     * @param yStart Start column to copy to the new matrix
-     * @param xEnd End row to copy to the new matrix
-     * @param yEnd End column to copy to the new matrix
-     * @return A new matrix comprising a part of the complete matrix
+     * @brief Checks if the matrix contains an element at this position
+     * @param row Row position of the element
+     * @param col Column position of the element
+     * @return Whether there is an element present at this position
      */
-    Matrix<T> slice(int xStart, int yStart, int xEnd, int yEnd);
+    virtual bool contains(int row, int col) const
+    {
+        return row >= 0 && row < _rows && col >= 0 && col < _cols;
+    }
 
     /**
-     * @brief Gets a list of all elements in the matrix
-     * @return A vector containing all elements present in the matrix
+     * @brief Fetches a cell from the matrix
+     * @param row Row position to fetch the element from
+     * @param col Column position to fetch the element from
+     * @return The element at that position in the matrix
      */
-    std::vector<T> all() const;
+    inline const T& get(int row, int col) const
+    {
+        assert(this->contains(row, col));
+        return this->_get(row, col);
+    }
 
     /**
      * @brief Updates a cell in the matrix
-     * @param x Row position to place the element on
-     * @param y Column position to place the element on
+     * @param row Row position to place the element on
+     * @param col Column position to place the element on
      * @param object The element to place in the matrix
      */
-    void set(int x, int y, const T& object);
+    inline void set(int row, int col, const T& object)
+    {
+        this->__verify_offsets(row, col);
+        this->_set(row, col, object);
+    }
 
     /**
-     * @brief Fetches a cell from the matrix
-     * @param x Row position to fetch the element from
-     * @param y Column position to fetch the element from
-     * @return The element at that position in the matrix
+     * @brief Creates a new matrix from a part of the matrix.
+     * @param rowStart Start row to copy to the new matrix
+     * @param colStart Start column to copy to the new matrix
+     * @param rowEnd End row to copy to the new matrix
+     * @param colEnd End column to copy to the new matrix
+     * @return A view into the current matrix comprising a part of the complete matrix
      */
-    T &get(int x, int y);
+    std::unique_ptr<MatrixView<T>> slice(int rowStart, int colStart, int rowEnd, int colEnd)
+    {
+        this->__verify_offsets(rowStart, colStart);
+        this->__verify_offsets(rowEnd, colEnd);
+        assert(rowStart <= rowEnd);
+        assert(colStart <= colEnd);
+        return this->unsafeSlice(rowStart, colStart, rowEnd, colEnd);
+    }
+
+    std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
+    {
+        return std::unique_ptr<MatrixView<T>>(new MatrixView<T>(this, rowStart, colStart, rowEnd, colEnd));
+    }
 
     /**
-     * @brief Fetches a cell from the matrix
-     * @param x Row position to fetch the element from
-     * @param y Column position to fetch the element from
-     * @return The element at that position in the matrix
+     * @brief Returns an iterator to the first element of the matrix
+     * @return An iterator pointing to the beginning of the matrix
      */
-    const T &get(int x, int y) const;
+    virtual MatrixIterator<T> begin()
+    {
+        return MatrixIterator<T>(this, 0, 0);
+    }
+
+    /**
+     * @brief Returns an iterator to the element following the last element of the matrix
+     * @return An iterator pointing past the end of the matrix
+     */
+    virtual MatrixIterator<T> end()
+    {
+        return MatrixIterator<T>(this, this->rows(), 0);
+    }
 
     /**
      * @return The number of rows in this matrix
      */
-    int rows() const { return _rows; }
+    inline int rows() const
+    {
+        return _rows;
+    }
+
     /**
      * @return The number of columns in this matrix
      */
-    int cols() const { return _cols; }
+    inline int cols() const
+    {
+        return _cols;
+    }
+
+protected:
+    virtual const T& _get(int row, int col) const = 0;
+
+    virtual void _set(int row, int col, const T& object) = 0;
+
+    /**
+     * @brief Asserts that a given position is within the bounds of the matrix
+     * @param row
+     * @param col
+     */
+    inline void __verify_offsets(int row, int col) const
+    {
+        assert(row >= 0);
+        assert(col >= 0);
+        assert(row < this->rows());
+        assert(col < this->cols());
+    }
+
 private:
-    inline void __verify_offsets(int x, int y) const;
     int _rows;
     int _cols;
+};
+
+
+/**
+ * @brief A dense matrix allocates a block of memory to contain all cells upfront.
+ *
+ * @tparam T Type of element contained in the matrix
+ */
+template<class T>
+class DenseMatrix: public Matrix<T>
+{
+public:
+    DenseMatrix(int rows, int cols):
+        Matrix<T>(rows, cols), storage(rows*cols)
+    {
+
+    }
+
+protected:
+    virtual const T &_get(int row, int col) const override
+    {
+        return storage[row*this->cols()+col];
+    }
+
+    virtual void _set(int row, int col, const T& object) override
+    {
+        storage[row*this->cols()+col] = object;
+    }
+
+private:
     std::vector<T> storage;
 };
 
 
+/**
+ * @brief A sparse matrix only allocates memory for cells that have been added to the matrix.
+ *
+ * @tparam T Type of element contained in the matrix
+ */
 template<class T>
-Matrix<T>::Matrix(int xLen, int yLen):
-    _rows(xLen), _cols(yLen), storage(xLen*yLen)
+class SparseMatrix: public Matrix<T>
 {
-}
+public:
+    SparseMatrix(int rows, int cols):
+        Matrix<T>(rows, cols), storage()
+    {
 
-template<class T>
-Matrix<T> Matrix<T>::slice(int xStart, int yStart, int xEnd, int yEnd)
-{
-    __verify_offsets(xStart, yStart);
-    __verify_offsets(xEnd, yEnd);
-    assert(xStart <= xEnd);
-    assert(yStart <= yEnd);
-    Matrix<T> matrix(xEnd-xStart+1, yEnd-yStart+1);
-    for(int i=xStart; i <= xEnd; i++) {
-        for(int j=yStart; j <= yEnd; j++) {
-            matrix.set(i-xStart, j-yStart, this->get(i, j));
-        }
     }
-    return matrix;
-}
+
+    virtual bool contains(int row, int col) const override
+    {
+        if(!Matrix<T>::contains(row, col))
+            return false;
+        return storage.find(row*this->cols()+col) != storage.end();
+    }
+
+protected:
+    virtual const T &_get(int row, int col) const override
+    {
+        return storage.at(row*this->cols()+col);
+    }
+
+    virtual void _set(int row, int col, const T& object) override
+    {
+        storage[row*this->cols()+col] = object;
+    }
+
+private:
+    std::map<int, T> storage;
+};
 
 
+/**
+ * @brief A matrix view allows read/write access to a subset of a matrix.
+ * @internal
+ * @tparam T Type of element contained in the matrix
+ */
 template<class T>
-std::vector<T> Matrix<T>::all() const
+class MatrixView: public Matrix<T>
 {
-    return storage;
-}
+public:
+    MatrixView(Matrix<T> *matrix, int rowStart, int colStart, int rowEnd, int colEnd):
+        Matrix<T>(rowEnd-rowStart+1, colEnd-colStart+1), matrix(matrix), _rowStart(rowStart), _colStart(colStart)
+    {
 
+    }
+
+    virtual bool contains(int row, int col) const override
+    {
+        if(!Matrix<T>::contains(row, col))
+            return false;
+        return matrix->contains(_rowStart+row, _colStart+col);
+    }
+
+protected:
+    virtual const T &_get(int row, int col) const override
+    {
+        return matrix->get(_rowStart+row, _colStart+col);
+    }
+
+    virtual void _set(int row, int col, const T& object) override
+    {
+        matrix->set(_rowStart+row, _colStart+col, object);
+    }
+
+private:
+    Matrix<T> *matrix;
+    int _rowStart;
+    int _colStart;
+};
+
+/**
+ * @brief An iterator that iterates over the elements in the matrix
+ * @internal
+ * @tparam T Type of element contained in the matrix
+ */
 template<class T>
-T& Matrix<T>::get(int x, int y)
+class MatrixIterator
 {
-    __verify_offsets(x, y);
-    return storage[x*_cols+y];
-}
+    typedef struct Value {
+        T value;
+        int row;
+        int col;
+    } Value;
 
-template<class T>
-const T& Matrix<T>::get(int x, int y) const
-{
-    __verify_offsets(x, y);
-    return storage[x*_cols+y];
-}
-
-template<class T>
-void Matrix<T>::set(int x, int y, const T& object)
-{
-    __verify_offsets(x, y);
-    storage[x*_cols+y] = object;
-}
+public:
+    MatrixIterator(Matrix<T> *matrix, int rowPos, int colPos):
+        matrix(matrix), colPos(colPos), rowPos(rowPos)
+    {
+        // If the first given position is not in the matrix, and we are still in bounds go to the next position
+        if(!matrix->contains(rowPos, colPos) && rowPos < matrix->rows())
+            this->operator ++();
+    }
 
 
-template<class T>
-inline void Matrix<T>::__verify_offsets(int x, int y) const
-{
-    assert(x >= 0);
-    assert(y >= 0);
-    assert(x < this->rows());
-    assert(y < this->cols());
-}
+    bool operator!=(const MatrixIterator<T> &other) const
+    {
+        return matrix != other.matrix || colPos != other.colPos || rowPos != other.rowPos;
+    }
 
+    MatrixIterator<T>& operator++()
+    {
+        do {
+            ++colPos;
+            if(colPos >= matrix->cols()) {
+                colPos=0;
+                ++rowPos;
+            }
+        /*
+         * Keep going until we find a position that has an element
+         * To prevent unbounded iteration, keep going as long as we are in a valid row.
+         * When we reach matrix->rows(), we are one position behind the iterator,
+         * so it nicely matches the end() iterator.
+     */
+        } while(!matrix->contains(rowPos, colPos) && rowPos < matrix->rows());
+        return *this;
+    }
+
+    const Value operator*() const
+    {
+        return {matrix->get(rowPos, colPos),rowPos,colPos};
+        //return matrix->get(rowPos, colPos);
+    }
+
+private:
+    Matrix<T> *matrix;
+    int colPos;
+    int rowPos;
+};
+
+
+/**
+ * @brief Prints a matrix to an output stream
+ */
 template<class T>
 std::ostream& operator<<(std::ostream &stream, const Matrix<T> &matrix)
 {
     for(int i=0; i < matrix.rows(); i++) {
         for(int j=0; j < matrix.cols(); j++) {
-            stream << matrix.get(i, j);
+            if(matrix.contains(i, j)) {
+                stream << matrix.get(i, j);
+            } else {
+                stream << '?';
+            }
             if(j < matrix.cols() - 1)
                 stream << " ";
         }
