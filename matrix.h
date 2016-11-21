@@ -11,7 +11,16 @@ template<class T>
 class MatrixView;
 
 template<class T>
+class SparseViewIterator;
+
+template<class T>
 class MatrixIterator;
+
+template<class T>
+class SparseMatrixIterator;
+
+template<class T>
+class SparseMatrixViewIterator;
 
 /**
  * @brief A simple fixed-size matrix which allows read/write access to objects inside it.
@@ -85,7 +94,7 @@ public:
         return this->unsafeSlice(rowStart, colStart, rowEnd, colEnd);
     }
 
-    std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
+    virtual std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
     {
         return std::unique_ptr<MatrixView<T>>(new MatrixView<T>(this, rowStart, colStart, rowEnd, colEnd));
     }
@@ -201,6 +210,16 @@ public:
         return storage.find(row*this->cols()+col) != storage.end();
     }
 
+    virtual MatrixIterator<T> begin() override
+    {
+        return SparseMatrixIterator<T>(this, 0, 0, storage.begin(), storage.end());
+    }
+
+    virtual MatrixIterator<T> end() override
+    {
+        return SparseMatrixIterator<T>(this, this->rows(), 0, storage.end(), storage.end());
+    }
+
 protected:
     virtual const T &_get(int row, int col) const override
     {
@@ -214,6 +233,9 @@ protected:
 
 private:
     std::map<int, T> storage;
+
+    friend SparseMatrixViewIterator<T> SparseMatrixView<T>::begin();
+    friend SparseMatrixViewIterator<T> SparseMatrixView<T>::end();
 };
 
 
@@ -256,6 +278,21 @@ private:
     int _colStart;
 };
 
+template<class T>
+class SparseMatrixView: public MatrixView<T>
+{
+    virtual SparseMatrixViewIterator<T> begin() override
+    {
+        return SparseMatrixViewIterator<T>(this, 0, 0, matrix->storage.begin(), matrix->storage.end());
+    }
+
+    virtual SparseMatrixViewIterator<T> end() override
+    {
+        return SparseMatrixViewIterator<T>(this, this->rows(), 0, matrix->storage.end(), matrix->storage.end());
+    }
+};
+
+
 /**
  * @brief An iterator that iterates over the elements in the matrix
  * @internal
@@ -264,13 +301,13 @@ private:
 template<class T>
 class MatrixIterator
 {
+public:
     typedef struct Value {
         T value;
         int row;
         int col;
     } Value;
 
-public:
     MatrixIterator(Matrix<T> *matrix, int rowPos, int colPos):
         matrix(matrix), colPos(colPos), rowPos(rowPos)
     {
@@ -279,13 +316,12 @@ public:
             this->operator ++();
     }
 
-
     bool operator!=(const MatrixIterator<T> &other) const
     {
         return matrix != other.matrix || colPos != other.colPos || rowPos != other.rowPos;
     }
 
-    MatrixIterator<T>& operator++()
+    virtual MatrixIterator<T>& operator++()
     {
         do {
             ++colPos;
@@ -298,7 +334,7 @@ public:
          * To prevent unbounded iteration, keep going as long as we are in a valid row.
          * When we reach matrix->rows(), we are one position behind the iterator,
          * so it nicely matches the end() iterator.
-     */
+         */
         } while(!matrix->contains(rowPos, colPos) && rowPos < matrix->rows());
         return *this;
     }
@@ -306,15 +342,76 @@ public:
     const Value operator*() const
     {
         return {matrix->get(rowPos, colPos),rowPos,colPos};
-        //return matrix->get(rowPos, colPos);
     }
 
-private:
+protected:
     Matrix<T> *matrix;
     int colPos;
     int rowPos;
 };
 
+/**
+ * @brief An specialized iterator that efficiently iterates over the elements in a sparse matrix
+ * @internal
+ * @tparam T Type of element contained in the matrix
+ */
+template<class T>
+class SparseMatrixIterator: public MatrixIterator<T>
+{
+public:
+    SparseMatrixIterator(SparseMatrix<T> *matrix, int rowPos, int colPos, typename std::map<int, T>::iterator mapIterator, typename std::map<int, T>::iterator mapEnd):
+        MatrixIterator<T>(matrix, rowPos, colPos), mapIterator(mapIterator), mapEnd(mapEnd)
+    {
+        _updatePositions();
+    }
+
+    bool operator !=(const SparseMatrixIterator<T> &other) const
+    {
+        return mapIterator != other.mapIterator;
+    }
+
+    virtual MatrixIterator<T> & operator++() override
+    {
+        ++mapIterator;
+        _updatePositions();
+        return *this;
+    }
+
+
+protected:
+    typename std::map<int, T>::iterator mapIterator;
+    typename std::map<int, T>::iterator mapEnd;
+
+private:
+    void _updatePositions()
+    {
+        if(mapIterator != mapEnd) {
+            this->rowPos = (*mapIterator).first / this->matrix->cols();
+            this->colPos = (*mapIterator).first % this->matrix->cols();
+        } else {
+            this->rowPos = this->matrix->rows();
+            this->colPos = 0;
+        }
+    }
+};
+
+template<class T>
+class SparseMatrixViewIterator: public SparseMatrixIterator<T>
+{
+    SparseMatrixIterator(SparseMatrixView<T> *matrix, int rowPos, int colPos, typename std::map<int, T>::iterator mapIterator, typename std::map<int, T>::iterator mapEnd):
+        SparseMatrixIterator<T>(matrix, rowPos, colPos, mapIterator, mapEnd)
+    {
+
+    }
+
+    virtual MatrixIterator<T> & operator++() override
+    {
+        do {
+            SparseMatrixIterator<T>::operator ++();
+        } while(!matrix->contains(rowPos, colPos));
+        return *this;
+    }
+}
 
 /**
  * @brief Prints a matrix to an output stream
