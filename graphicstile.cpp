@@ -24,8 +24,8 @@ void GraphicsComponent::showBoundingBox()
 void GraphicsComponent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     this->doPaint(painter, option, widget);
-    boundingBox.paint(painter, option, widget);
 }
+
 
 
 GraphicsTile::GraphicsTile(const std::shared_ptr<const Tile> &tile, QGraphicsItem * parent):
@@ -46,18 +46,16 @@ GraphicsTile::GraphicsTile(const std::shared_ptr<const Tile> &tile, QGraphicsIte
 
 void GraphicsTile::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    tileRect.paint(painter, option, widget);
 }
 
 
 GraphicsEnemy::GraphicsEnemy(const std::shared_ptr<const Enemy> &enemy, QGraphicsItem * parent):
-    GraphicsComponent(enemy, parent), enemyEllipse(this), enemyText(), enemy(enemy)
+    GraphicsComponent(enemy, parent), enemyEllipse(this), enemyText(this), enemy(enemy)
 {
     enemyEllipse.setRect(0, 0, 1, 1);
     enemyText.setScale(0.1);
     enemyText.setBrush(Qt::white);
     enemyText.setPen(QPen(Qt::black, 0));
-    enemyText.setParentItem(this);
     QColor color(0, 0xff, 0);
 
     // This cast will only succeed when the object in the shared_ptr is an instance of PEnemy
@@ -79,8 +77,6 @@ void GraphicsEnemy::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *o
     } else {
         enemyText.setText(QString::number(penemy->getValue())+ " P: "+QString::number(penemy->getPoisonLevel()));
     }
-    enemyEllipse.paint(painter, option, widget);
-    enemyText.paint(painter, option, widget);
 }
 
 GraphicsHealthpack::GraphicsHealthpack(const std::shared_ptr<const Tile> &tile, QGraphicsItem *parent):
@@ -100,8 +96,6 @@ GraphicsHealthpack::GraphicsHealthpack(const std::shared_ptr<const Tile> &tile, 
 void GraphicsHealthpack::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     hpText.setText(QString::number(tile->getValue()));
-    hpText.paint(painter, option, widget);
-    hpEllipse.paint(painter, option, widget);
 }
 
 GraphicsProtagonist::GraphicsProtagonist(const std::shared_ptr<const Protagonist> &protagonist, QGraphicsItem *parent):
