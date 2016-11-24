@@ -7,6 +7,12 @@
 #include <QString>
 #include <QGraphicsScene>
 
+typedef struct PStruct {
+    std::shared_ptr<Tile> tile;
+    std::shared_ptr<Enemy> enemy;
+    std::shared_ptr<Tile> healthpack;
+} PStruct;
+
 class WorldController
 {
 public:
@@ -17,14 +23,9 @@ public:
     int range;
     int scale;
 private:
-    typedef Matrix<std::shared_ptr<Tile>> MTiles;
-    typedef Matrix<std::shared_ptr<Enemy>> MEnemies;
-    std::unique_ptr<MTiles> tiles;
-    std::unique_ptr<MEnemies> enemies;
-    std::unique_ptr<MTiles> healthpacks;
+    std::unique_ptr<Matrix<PStruct>> tiles;
     std::shared_ptr<Protagonist> protagonist;
-    template<class T>
-    std::unique_ptr<T> getTilesAroundProtagonist(std::unique_ptr<T> &matrix);
+    std::unique_ptr<Matrix<PStruct>> getTilesAroundProtagonist(std::unique_ptr<Matrix<PStruct>> &matrix);
 };
 
 #endif // WORLDCONTROLLER_H
