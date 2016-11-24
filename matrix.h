@@ -50,7 +50,7 @@ public:
      * @param col Column position to fetch the element from
      * @return The element at that position in the matrix
      */
-    inline const T& get(int row, int col) const
+    inline T& get(int row, int col)
     {
         assert(this->contains(row, col));
         return this->_get(row, col);
@@ -125,7 +125,7 @@ public:
     }
 
 protected:
-    virtual const T& _get(int row, int col) const = 0;
+    virtual T& _get(int row, int col)  = 0;
 
     virtual void _set(int row, int col, const T& object) = 0;
 
@@ -164,7 +164,7 @@ public:
     }
 
 protected:
-    virtual const T &_get(int row, int col) const override
+    virtual  T &_get(int row, int col)  override
     {
         return storage[row*this->cols()+col];
     }
@@ -202,7 +202,7 @@ public:
     }
 
 protected:
-    virtual const T &_get(int row, int col) const override
+    virtual  T &_get(int row, int col)  override
     {
         return storage.at(row*this->cols()+col);
     }
@@ -241,7 +241,7 @@ public:
     }
 
 protected:
-    virtual const T &_get(int row, int col) const override
+    virtual  T &_get(int row, int col)  override
     {
         return matrix->get(_rowStart+row, _colStart+col);
     }
