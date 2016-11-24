@@ -15,6 +15,8 @@ void MainWindow::createWorld(QString file)
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
     controller.render(*scene);
     mainView.setScene(scene);
+    mainView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mainView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

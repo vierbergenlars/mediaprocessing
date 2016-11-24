@@ -2,20 +2,6 @@
 #include <cmath>
 #include "graphicstile.h"
 
-
-template<class T>
-void tilesVectorToMatrix(std::vector<std::unique_ptr<T>> &tilesList, std::unique_ptr<Matrix<std::shared_ptr<T>>> &tiles)
-{
-    for(std::unique_ptr<T> &tile: tilesList) {
-        int row = tile->getYPos();
-        int col = tile->getXPos();
-        if(tile->getValue() > 1.0 && ! std::isinf(tile->getValue())) {
-            std::cout << row << "," << col << std::endl;
-        }
-        tiles->set(row, col, std::move(tile));
-    }
-}
-
 WorldController::WorldController()
     : range(20), scale(10)
 {
@@ -26,7 +12,7 @@ void WorldController::createWorld(QString file)
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
-    tiles = std::unique_ptr<DenseMatrix<PStruct>>(new DenseMatrix<PStruct>(world.getRows(), world.getCols()));
+    tiles = new DenseMatrix<PStruct>(world.getRows(), world.getCols());
 
     for(std::unique_ptr<Tile> &tile: tilesList) {
         int row = tile->getYPos();
@@ -52,20 +38,19 @@ void WorldController::createWorld(QString file)
 }
 
 
-std::unique_ptr<Matrix<PStruct>> WorldController::getTilesAroundProtagonist(std::unique_ptr<Matrix<PStruct>> &matrix)
+std::unique_ptr<Matrix<PStruct>> WorldController::getTilesAroundProtagonist()
 {
     int rowStart = protagonist->getYPos()-range;
     int colStart = protagonist->getXPos()-range;
     int rowEnd = protagonist->getYPos()+range;
     int colEnd = protagonist->getXPos()+range;
-    return matrix->unsafeSlice(rowStart, colStart, rowEnd, colEnd);
+    return tiles->unsafeSlice(rowStart, colStart, rowEnd, colEnd);
 }
 
 
 void WorldController::render(QGraphicsScene& scene)
 {
-    scene.clear();
-    auto tilesAroundProtagonist = getTilesAroundProtagonist(tiles);
+    auto tilesAroundProtagonist = getTilesAroundProtagonist();
 
     for(const auto &pstruct: *tilesAroundProtagonist) {
         auto tile = pstruct.value.tile;
@@ -83,7 +68,6 @@ void WorldController::render(QGraphicsScene& scene)
             genemy->setZValue(2);
             scene.addItem(genemy);
         }
-/*
         auto healthpack = pstruct.value.healthpack;
         if(healthpack != nullptr) {
             GraphicsHealthpack* ghealthpack = new GraphicsHealthpack(healthpack);
@@ -92,7 +76,6 @@ void WorldController::render(QGraphicsScene& scene)
             ghealthpack->setZValue(2);
             scene.addItem(ghealthpack);
         }
-        */
     }
 
     GraphicsProtagonist* gprotagonist = new GraphicsProtagonist(protagonist);
@@ -106,8 +89,10 @@ void WorldController::moveProtagonist(int x, int y)
 {
     int newCol = protagonist->getXPos()+x;
     int newRow = protagonist->getYPos()+y;
-    if(tiles->contains(newRow, newCol))
-        protagonist->setPos(newCol, newRow);
+    if(tiles->contains(newRow, newCol)) {
+        if(!std::isinf(tiles->get(newRow, newCol).tile->getValue()))
+            protagonist->setPos(newCol, newRow);
+    }
 }
 
 

@@ -23,9 +23,9 @@ public:
     int range;
     int scale;
 private:
-    std::unique_ptr<Matrix<PStruct>> tiles;
+    Matrix<PStruct> *tiles;
     std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<PStruct>> getTilesAroundProtagonist(std::unique_ptr<Matrix<PStruct>> &matrix);
+    std::unique_ptr<Matrix<PStruct>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H
