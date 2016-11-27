@@ -1,7 +1,7 @@
 #include "pathfinder.h"
 #include <algorithm>
 
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, std::unique_ptr<Matrix<PStruct> > &matrix):
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<PStruct>* matrix):
     _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix)
 {
 

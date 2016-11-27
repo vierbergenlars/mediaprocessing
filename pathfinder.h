@@ -20,10 +20,10 @@ bool operator==(const Node& a) const
 class PathFinder
 {
 public:
-    PathFinder(int xstart, int ystart, int xend, int yend, std::unique_ptr<Matrix<PStruct>> & matrix);
+    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<PStruct>* matrix);
     std::deque<Node> Run();
 private:
-    std::unique_ptr<Matrix<PStruct>> & _matrix;
+    Matrix<PStruct>* _matrix;
     std::deque<Node> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;
