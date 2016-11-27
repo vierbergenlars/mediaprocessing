@@ -34,5 +34,7 @@ int main(int argc, char *argv[])
     }
 
     mainWindow.show();
+
+    controller.findPath();
     return a.exec();
 }

@@ -6,6 +6,7 @@
 #include <world.h>
 #include <QString>
 #include <QGraphicsScene>
+#include <deque>
 
 typedef struct PStruct {
     std::shared_ptr<Tile> tile;
@@ -22,6 +23,7 @@ public:
     void moveProtagonist(int rows, int cols);
     int range;
     int scale;
+    void findPath();
 private:
     std::unique_ptr<Matrix<PStruct>> tiles;
     std::shared_ptr<Protagonist> protagonist;

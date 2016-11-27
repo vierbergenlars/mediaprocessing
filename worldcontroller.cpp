@@ -1,6 +1,8 @@
 #include "worldcontroller.h"
 #include <cmath>
 #include "graphicstile.h"
+#include "pathfinder.h"
+
 
 
 template<class T>
@@ -108,6 +110,14 @@ void WorldController::moveProtagonist(int x, int y)
     int newRow = protagonist->getYPos()+y;
     if(tiles->contains(newRow, newCol))
         protagonist->setPos(newCol, newRow);
+}
+
+// random bullshit pls ignore
+void WorldController::findPath()
+{
+    PathFinder path(0,0, 10, 10, tiles);
+    path.Run();
+
 }
 
 
