@@ -164,7 +164,7 @@ public:
     }
 
 protected:
-    virtual  T &_get(int row, int col)  override
+    virtual T &_get(int row, int col) override
     {
         return storage[row*this->cols()+col];
     }
@@ -176,45 +176,6 @@ protected:
 
 private:
     std::vector<T> storage;
-};
-
-
-/**
- * @brief A sparse matrix only allocates memory for cells that have been added to the matrix.
- *
- * @tparam T Type of element contained in the matrix
- */
-template<class T>
-class SparseMatrix: public Matrix<T>
-{
-public:
-    SparseMatrix(int rows, int cols):
-        Matrix<T>(rows, cols), storage()
-    {
-
-    }
-
-    virtual bool contains(int row, int col) const override
-    {
-        if(!Matrix<T>::contains(row, col))
-            return false;
-        return storage.find(row*this->cols()+col) != storage.end();
-    }
-
-protected:
-    virtual  T &_get(int row, int col)  override
-    {
-        return storage.at(row*this->cols()+col);
-    }
-
-    virtual void _set(int row, int col, const T& object) override
-    {
-        storage[row*this->cols()+col] = object;
-    }
-
-private:
-    std::map<int, T> storage;
-
 };
 
 
@@ -233,6 +194,11 @@ public:
 
     }
 
+    virtual std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
+    {
+        return matrix->unsafeSlice(_rowStart+rowStart, _colStart+colStart, _rowStart+rowEnd, _colStart+colEnd);
+    }
+
     virtual bool contains(int row, int col) const override
     {
         if(!Matrix<T>::contains(row, col))
@@ -241,7 +207,7 @@ public:
     }
 
 protected:
-    virtual  T &_get(int row, int col)  override
+    virtual T &_get(int row, int col) override
     {
         return matrix->get(_rowStart+row, _colStart+col);
     }
