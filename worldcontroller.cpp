@@ -19,7 +19,7 @@ void WorldController::createWorld(QString file)
     for(std::unique_ptr<Tile> &tile: tilesList) {
         int row = tile->getYPos();
         int col = tile->getXPos();
-        tiles->set(row, col, {std::move(tile), nullptr, 0});
+        tiles->set(row, col, {std::move(tile), nullptr, 0, Status::none});
     }
 
     auto enemiesList = world.getEnemies(8);
@@ -101,7 +101,7 @@ void WorldController::moveProtagonist(int x, int y)
 void WorldController::findPath()
 {
     PathFinder path(0,0, 10, 10, tiles);
-    path.Run();
+    path.RunAStar();
 
 }
 

@@ -8,10 +8,13 @@
 #include <QGraphicsScene>
 #include <deque>
 
+enum Status {none, openlist, closedlist, solution};
 typedef struct PStruct {
     std::shared_ptr<Tile> tile;
     std::shared_ptr<Enemy> enemy;
     std::shared_ptr<Tile> healthpack;
+
+    Status pathStatus;
 } PStruct;
 
 class WorldController
