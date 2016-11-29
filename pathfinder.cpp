@@ -35,9 +35,9 @@ std::deque<Node> PathFinder::Run()
             for(int j=0; j <= 2; j++){
                 int x = currentNode.pstruct->tile->getXPos() +i-1;
                 int y = currentNode.pstruct->tile->getYPos() +j - 1;
-                if(_matrix->contains(x,y)){ //positie in range of matrix
+                if(_matrix->contains(y,x)){ //positie in range of matrix
                     Node nearbyNode;
-                    nearbyNode.pstruct = &_matrix->get(x,y);
+                    nearbyNode.pstruct = &_matrix->get(y,x);
                     if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
                         // bool found = std::find(openList.begin(), openList.end(), nearbyNode) != openList.end(); // std::find(openList.begin(), openList.end(), nearbyNode) != openList.end()
                         // if true, dan al in open lijst
@@ -78,7 +78,7 @@ std::deque<Node> PathFinder::RunAStar()
     startNode.parent = nullptr;
     startNode.finalCost = 0;
     startNode.givenCost = 0;
-    startNode.pstruct = &_matrix->get(_xstart, _ystart);
+    startNode.pstruct = &_matrix->get(_ystart,_xstart);
 
     Node currentNode;
     //step 2
@@ -98,13 +98,16 @@ std::deque<Node> PathFinder::RunAStar()
         std::shared_ptr<Node> parent_ptr = std::make_shared<Node>(currentNode);
         for(int i= 0; i<=2;i++){ // ga alle posities rond current af
             for(int j=0; j <= 2; j++){
+                if(i==1 && j==1) continue; // no need to do the current node all over again.
                 int x = currentNode.pstruct->tile->getXPos() +i-1;
                 int y = currentNode.pstruct->tile->getYPos() +j - 1;
-                if(_matrix->contains(x,y)){ //positie in range of matrix
-                    Node nearbyNode;
-                    nearbyNode.pstruct = &_matrix->get(x,y);
 
-                    PStruct* nearbyPStruct = &_matrix->get(x,y);
+                if(_matrix->contains(y,x)){ //positie in range of matrix
+                    Node nearbyNode;
+                    nearbyNode.pstruct = &_matrix->get(y,x);
+                    nearbyNode.x = x;nearbyNode.y = y;
+
+                    PStruct* nearbyPStruct = &_matrix->get(y,x);
                     if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
 
 
@@ -114,16 +117,16 @@ std::deque<Node> PathFinder::RunAStar()
 
 
 
-                        nearbyNode.parent= parent_ptr; // set parrent pointer to current node
-                        nearbyNode.givenCost = nearbyNode.parent->givenCost + nearbyNode.pstruct->tile->getValue();
-                        nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(nearbyNode.pstruct->tile->getXPos(),nearbyNode.pstruct->tile->getYPos());
+                        nearbyNode.parent= parent_ptr; // set parent pointer to current node
+                        nearbyNode.givenCost = currentNode.givenCost + nearbyNode.pstruct->tile->getValue();
+                        nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y);
                          if( nearbyNode.pstruct->pathStatus == Status::none){ //  if not already in Lists
                              openList.push_front(nearbyNode); //add to open list
                              nearbyNode.pstruct->pathStatus = Status::openlist;
                          }
                         else if(nearbyNode.pstruct->pathStatus == Status::openlist){ // er is een oude node in openList
                             std::deque<Node>::iterator it = std::find(openList.begin(),openList.end(), nearbyNode);
-                            if( (*it).givenCost < nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
+                            if( (*it).givenCost > nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
 
                                 openList.erase(it);
                                 openList.push_front(nearbyNode); //add to open list
@@ -133,7 +136,7 @@ std::deque<Node> PathFinder::RunAStar()
 
                         else if(nearbyNode.pstruct->pathStatus == Status::closedlist){
                             std::deque<Node>::iterator it = std::find(closedList.begin(),closedList.end(), nearbyNode);
-                            if( (*it).givenCost < nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
+                            if( (*it).givenCost > nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
                                 closedList.erase(it); //remove old node
                                 openList.push_front(nearbyNode); //add to open list
                                 nearbyNode.pstruct->pathStatus = Status::openlist;

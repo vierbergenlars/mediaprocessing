@@ -11,6 +11,8 @@ PStruct* pstruct;
 std::shared_ptr<Node> parent;
 float finalCost = 0;
 float givenCost = 0;
+int x =0; // maakt debuggen makkelijker
+int y = 0;
 
 bool operator==(const Node& a) const  // nodig voor std::find
     {
