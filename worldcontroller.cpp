@@ -64,10 +64,33 @@ void WorldController::render(QGraphicsScene& scene)
         GraphicsTile* gtile = new GraphicsTile(tile);
         gtile->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
         gtile->setScale(scale);
-        gtile->setZValue(1);;
+        gtile->setZValue(1);
         scene.addItem(gtile);
 
-        auto enemy = pstruct.value.enemy;
+        auto status = pstruct.value->pathStatus;
+
+        if(status != none) {
+        QGraphicsRectItem* rect = new QGraphicsRectItem;
+            rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+            rect->setScale(scale);
+            rect->setZValue(4);
+            rect->setPen(Qt::NoPen);
+            rect->setOpacity(0.4);
+        switch(status) {
+        case openlist:
+            rect->setBrush(QBrush(Qt::blue));
+            break;
+        case closedlist:
+            rect->setBrush(QBrush(Qt::gray));
+            break;
+        case solution:
+            rect->setBrush(QBrush(Qt::green));
+            break;
+        }
+            scene.addItem(rect);
+        }
+
+        auto enemy = pstruct.value->enemy;
         if(enemy != nullptr) {
             GraphicsEnemy* genemy = new GraphicsEnemy(enemy);
             genemy->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
