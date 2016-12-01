@@ -2,8 +2,8 @@
 #include <cmath>
 #include "graphicstile.h"
 #include "pathfinder.h"
-
-
+#include <chrono>
+#include <QDebug>
 WorldController::WorldController()
     : range(20), scale(10)
 {
@@ -127,8 +127,12 @@ void WorldController::moveProtagonist(int x, int y)
 // random bullshit pls ignore
 void WorldController::findPath()
 {
-    PathFinder path(0,0, 10, 10, tiles);
+    PathFinder path(4,4, 195, 195, tiles);
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     path.RunAStar();
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    qDebug() << duration << "ms";
 
 }
 

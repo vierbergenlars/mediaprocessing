@@ -97,11 +97,12 @@ std::deque<Node> PathFinder::RunAStar()
         // 3.3
 
         std::shared_ptr<Node> parent_ptr = std::make_shared<Node>(currentNode);
-        for(int i= 0; i<=2;i++){ // ga alle posities rond current af
-            for(int j=0; j <= 2; j++){
-                if(i==1 && j==1) continue; // no need to do the current node all over again.
-                int x = currentNode.pstruct->tile->getXPos() +i-1;
-                int y = currentNode.pstruct->tile->getYPos() +j - 1;
+        for(int i= -1; i<=1;i++){ // ga alle posities rond current af
+            for(int j=-1; j <= 1; j++){
+                if(i==0 && j==0) continue;// no need to do the current node all over again.
+                if(!(i==0 || j==0)) continue; // no diagonals
+                int x = currentNode.pstruct->tile->getXPos() +i;
+                int y = currentNode.pstruct->tile->getYPos() +j;
 
                 if(_matrix->contains(y,x)){ //positie in range of matrix
                     Node nearbyNode;
