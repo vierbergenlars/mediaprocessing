@@ -69,13 +69,13 @@ void WorldController::render(QGraphicsScene& scene)
 
         auto status = pstruct.value->pathStatus;
 
-        if(status != none) {
         QGraphicsRectItem* rect = new QGraphicsRectItem;
-            rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
-            rect->setScale(scale);
-            rect->setZValue(4);
-            rect->setPen(Qt::NoPen);
-            rect->setOpacity(0.4);
+        rect->setRect(0,0,1,1);
+        rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+        rect->setScale(scale);
+        rect->setZValue(4);
+        rect->setPen(Qt::NoPen);
+        rect->setOpacity(0.4);
         switch(status) {
         case openlist:
             rect->setBrush(QBrush(Qt::blue));
@@ -87,8 +87,7 @@ void WorldController::render(QGraphicsScene& scene)
             rect->setBrush(QBrush(Qt::green));
             break;
         }
-            scene.addItem(rect);
-        }
+        scene.addItem(rect);
 
         auto enemy = pstruct.value->enemy;
         if(enemy != nullptr) {
