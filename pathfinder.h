@@ -7,7 +7,7 @@
 
 
 typedef struct Node{
-PStruct* pstruct;
+std::shared_ptr<PStruct> pstruct;
 std::shared_ptr<Node> parent;
 float finalCost = 0;
 float givenCost = 0;
@@ -31,13 +31,13 @@ struct { // compare function used for priority queue
 class PathFinder
 {
 public:
-    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<PStruct>* matrix);
+    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<PStruct>>* matrix);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
 private:
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);
-    Matrix<PStruct>* _matrix;
+    Matrix<std::shared_ptr<PStruct>>* _matrix;
     std::deque<Node> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;

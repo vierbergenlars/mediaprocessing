@@ -28,9 +28,9 @@ public:
     int scale;
     void findPath();
 private:
-    Matrix<PStruct> *tiles;
+    Matrix<std::shared_ptr<PStruct>> *tiles;
     std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<PStruct>> getTilesAroundProtagonist();
+    std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H

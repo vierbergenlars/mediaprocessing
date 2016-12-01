@@ -1,7 +1,8 @@
 #include "pathfinder.h"
 #include <algorithm>
 #include <set>
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<PStruct>* matrix):
+#include <cmath>
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<PStruct>>* matrix):
     _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix)
 {
 
@@ -13,12 +14,12 @@ std::deque<Node> PathFinder::Run()
     Node startNode;
     startNode.parent = nullptr;
     startNode.finalCost = 0;
-    startNode.pstruct = &_matrix->get(_xstart, _ystart);
+    startNode.pstruct = _matrix->get(_xstart, _ystart);
 
     Node currentNode;
     //step 2
     openList.push_back(startNode);
-    startNode.pstruct->pathStatus == Status::openlist;
+    startNode.pstruct->pathStatus = Status::openlist;
 
     //step 3
     while(!openList.empty()){
@@ -37,7 +38,7 @@ std::deque<Node> PathFinder::Run()
                 int y = currentNode.pstruct->tile->getYPos() +j - 1;
                 if(_matrix->contains(y,x)){ //positie in range of matrix
                     Node nearbyNode;
-                    nearbyNode.pstruct = &_matrix->get(y,x);
+                    nearbyNode.pstruct = _matrix->get(y,x);
                     if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
                         // bool found = std::find(openList.begin(), openList.end(), nearbyNode) != openList.end(); // std::find(openList.begin(), openList.end(), nearbyNode) != openList.end()
                         // if true, dan al in open lijst
@@ -78,12 +79,12 @@ std::deque<Node> PathFinder::RunAStar()
     startNode.parent = nullptr;
     startNode.finalCost = 0;
     startNode.givenCost = 0;
-    startNode.pstruct = &_matrix->get(_ystart,_xstart);
+    startNode.pstruct = _matrix->get(_ystart,_xstart);
 
     Node currentNode;
     //step 2
     openList.push_back(startNode);
-    startNode.pstruct->pathStatus == Status::openlist;
+    startNode.pstruct->pathStatus = Status::openlist;
 
     //step 3
     while(!openList.empty()){
@@ -104,10 +105,9 @@ std::deque<Node> PathFinder::RunAStar()
 
                 if(_matrix->contains(y,x)){ //positie in range of matrix
                     Node nearbyNode;
-                    nearbyNode.pstruct = &_matrix->get(y,x);
+                    nearbyNode.pstruct = _matrix->get(y,x);
                     nearbyNode.x = x;nearbyNode.y = y;
 
-                    PStruct* nearbyPStruct = &_matrix->get(y,x);
                     if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
 
 
