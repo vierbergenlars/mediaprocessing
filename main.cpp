@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
         std::cerr << err.toStdString() << std::endl;
         return 2;
     }
-    controller.findPath();
     mainWindow.show();
 
 

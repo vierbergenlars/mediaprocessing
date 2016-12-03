@@ -34,6 +34,9 @@ public:
     PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<PStruct>>* matrix);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
+    void AStarInit();
+    bool RunAStarStep();
+    std::deque<Node> AStarSolution();
 private:
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);

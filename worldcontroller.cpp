@@ -42,11 +42,15 @@ void WorldController::createWorld(QString file)
     }
 
     protagonist = std::move(world.getProtagonist());
+    path = new PathFinder(0,0, 111, 53, tiles);
+    path->AStarInit();
 }
 
 
 std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> WorldController::getTilesAroundProtagonist()
 {
+    if(debugMode)
+        return tiles->unsafeSlice(0, 0, tiles->rows()-1, tiles->cols()-1);
     int rowStart = protagonist->getYPos()-range;
     int colStart = protagonist->getXPos()-range;
     int rowEnd = protagonist->getYPos()+range;
@@ -75,13 +79,13 @@ void WorldController::render(QGraphicsScene& scene)
         rect->setScale(scale);
         rect->setZValue(4);
         rect->setPen(Qt::NoPen);
-        rect->setOpacity(0.4);
+        rect->setOpacity(0.2);
         switch(status) {
         case openlist:
-            rect->setBrush(QBrush(Qt::blue));
+            rect->setBrush(QBrush(Qt::darkYellow));
             break;
         case closedlist:
-            rect->setBrush(QBrush(Qt::gray));
+            rect->setBrush(QBrush(Qt::blue));
             break;
         case solution:
             rect->setBrush(QBrush(Qt::green));
@@ -125,15 +129,10 @@ void WorldController::moveProtagonist(int x, int y)
 }
 
 // random bullshit pls ignore
-void WorldController::findPath()
+void WorldController::doPathfinderStep()
 {
-    PathFinder path(4,4, 195, 195, tiles);
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    path.RunAStar();
-    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-    qDebug() << duration << "ms";
-
+    if(path->RunAStarStep())
+        path->AStarSolution();
 }
 
 

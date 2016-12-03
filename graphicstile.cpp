@@ -6,6 +6,7 @@
 GraphicsComponent::GraphicsComponent(const std::shared_ptr<const Tile> & tile, QGraphicsItem *parent):
     QGraphicsItem(parent), boundingBox(this)
 {
+    this->setToolTip(QString::number(tile->getXPos()) + ","+QString::number(tile->getYPos()));
     boundingBox.setRect(0, 0, 1, 1);
     boundingBox.setPen(Qt::NoPen);
     boundingBox.setBrush(Qt::NoBrush);

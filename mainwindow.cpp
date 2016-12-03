@@ -15,8 +15,8 @@ void MainWindow::createWorld(QString file)
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
     controller.render(*scene);
     mainView.setScene(scene);
-    mainView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    mainView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //mainView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //mainView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -48,6 +48,32 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Minus:
         controller.scale*=2;
         controller.range/=4;
+        break;
+    case Qt::Key_Enter:
+        controller.doPathfinderStep();
+        break;
+    case Qt::Key_A:
+        for(int i=0; i<40; i++)
+            controller.doPathfinderStep();
+        break;
+    case Qt::Key_B:
+        for(int i=0; i<400; i++)
+            controller.doPathfinderStep();
+        break;
+    case Qt::Key_C:
+        for(int i=0; i<4000; i++)
+            controller.doPathfinderStep();
+        break;
+    case Qt::Key_D:
+        for(int i=0; i<40000; i++)
+            controller.doPathfinderStep();
+        break;
+    case Qt::Key_E:
+        for(int i=0; i<400000; i++)
+            controller.doPathfinderStep();
+        break;
+    case Qt::Key_F:
+        controller.debugMode=!controller.debugMode;
     }
 
     QGraphicsScene* prevScene = mainView.scene();

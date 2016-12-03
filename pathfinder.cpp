@@ -72,7 +72,86 @@ std::deque<Node> PathFinder::Run()
     return resultList;
 }
 
-std::deque<Node> PathFinder::RunAStar()
+bool PathFinder::RunAStarStep()
+{
+    Node currentNode;
+    //3.1 +3.2
+    currentNode = openList.back(); //get the best node form open List
+    if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // the current node is the solution node
+        return true;
+    }
+
+    //std::cout << "Best node: " << currentNode.x << ", " << currentNode.y << std::endl;
+
+    // 3.3
+
+    std::shared_ptr<Node> parent_ptr = std::make_shared<Node>(currentNode);
+    for(int i= -1; i<=1;i++){ // ga alle posities rond current af
+        for(int j=-1; j <= 1; j++){
+            if(i==0 && j==0) continue;// no need to do the current node all over again.
+            if(!(i==0 || j==0)) continue; // no diagonals
+            int x = currentNode.pstruct->tile->getXPos() +i;
+            int y = currentNode.pstruct->tile->getYPos() +j;
+
+            if(_matrix->contains(y,x)){ //positie in range of matrix
+                Node nearbyNode;
+                nearbyNode.pstruct = _matrix->get(y,x);
+                nearbyNode.x = x;nearbyNode.y = y;
+
+                if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
+
+
+                    // bool found = std::find(openList.begin(), openList.end(), nearbyNode) != openList.end();
+                    // if true, dan al in open lijst
+                    // if(!found) found = std::find(closedList.begin(), closedList.end(), nearbyNode) != closedList.end();// check in closedList
+
+
+
+                    nearbyNode.parent= parent_ptr; // set parent pointer to current node
+                    nearbyNode.givenCost = currentNode.givenCost + (1-nearbyNode.pstruct->tile->getValue());
+                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10;
+                    //std::cout << nearbyNode.x << ", " << nearbyNode.y <<" GivenCost: " << nearbyNode.givenCost << " FinalCost: " << nearbyNode.finalCost << std::endl;
+                    if( nearbyNode.pstruct->pathStatus == Status::none){ //  if not already in Lists
+                        openList.push_front(nearbyNode); //add to open list
+                        nearbyNode.pstruct->pathStatus = Status::openlist;
+                    }
+                    else if(nearbyNode.pstruct->pathStatus == Status::openlist){ // er is een oude node in openList
+                        std::deque<Node>::iterator it = std::find(openList.begin(),openList.end(), nearbyNode);
+                        if( (*it).givenCost > (1-nearbyNode.pstruct->tile->getValue()) + currentNode.givenCost ){ // old node is slechter
+                            openList.erase(it);
+                            openList.push_front(nearbyNode); //add to open list
+                            nearbyNode.pstruct->pathStatus = Status::openlist;
+                        }
+                    }
+
+                    else if(nearbyNode.pstruct->pathStatus == Status::closedlist){
+                        std::deque<Node>::iterator it = std::find(closedList.begin(),closedList.end(), nearbyNode);
+                        if( (*it).givenCost > (1-nearbyNode.pstruct->tile->getValue()) + currentNode.givenCost ){ // old node is slechter
+                            closedList.erase(it); //remove old node
+                            openList.push_front(nearbyNode); //add to open list
+                            nearbyNode.pstruct->pathStatus = Status::openlist;
+                        } //else old node is beter, keep old node, don't add new node
+                    }
+
+
+
+                }
+            }
+        }
+
+    }
+
+
+    openList.pop_back();//delete currentNode from open
+    closedList.push_back(currentNode); //add current node to closed
+    currentNode.pstruct->pathStatus = Status::closedlist;
+
+    std::sort(openList.begin(),openList.end(),CompareNode); //sort the open list on final cost
+    return false;
+
+}
+
+void PathFinder::AStarInit()
 {
     //step 1 Breadth-First
     Node startNode;
@@ -81,85 +160,14 @@ std::deque<Node> PathFinder::RunAStar()
     startNode.givenCost = 0;
     startNode.pstruct = _matrix->get(_ystart,_xstart);
 
-    Node currentNode;
     //step 2
     openList.push_back(startNode);
     startNode.pstruct->pathStatus = Status::openlist;
+}
 
-    //step 3
-    while(!openList.empty()){
-        //3.1 +3.2
-        currentNode = openList.back(); //get the best node form open List
-        if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // the current node is the solution node
-            break;
-        }
-
-        // 3.3
-
-        std::shared_ptr<Node> parent_ptr = std::make_shared<Node>(currentNode);
-        for(int i= -1; i<=1;i++){ // ga alle posities rond current af
-            for(int j=-1; j <= 1; j++){
-                if(i==0 && j==0) continue;// no need to do the current node all over again.
-                if(!(i==0 || j==0)) continue; // no diagonals
-                int x = currentNode.pstruct->tile->getXPos() +i;
-                int y = currentNode.pstruct->tile->getYPos() +j;
-
-                if(_matrix->contains(y,x)){ //positie in range of matrix
-                    Node nearbyNode;
-                    nearbyNode.pstruct = _matrix->get(y,x);
-                    nearbyNode.x = x;nearbyNode.y = y;
-
-                    if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
-
-
-                        // bool found = std::find(openList.begin(), openList.end(), nearbyNode) != openList.end();
-                        // if true, dan al in open lijst
-                        // if(!found) found = std::find(closedList.begin(), closedList.end(), nearbyNode) != closedList.end();// check in closedList
-
-
-
-                        nearbyNode.parent= parent_ptr; // set parent pointer to current node
-                        nearbyNode.givenCost = currentNode.givenCost + nearbyNode.pstruct->tile->getValue();
-                        nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y);
-                         if( nearbyNode.pstruct->pathStatus == Status::none){ //  if not already in Lists
-                             openList.push_front(nearbyNode); //add to open list
-                             nearbyNode.pstruct->pathStatus = Status::openlist;
-                         }
-                        else if(nearbyNode.pstruct->pathStatus == Status::openlist){ // er is een oude node in openList
-                            std::deque<Node>::iterator it = std::find(openList.begin(),openList.end(), nearbyNode);
-                            if( (*it).givenCost > nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
-
-                                openList.erase(it);
-                                openList.push_front(nearbyNode); //add to open list
-                                nearbyNode.pstruct->pathStatus = Status::openlist;
-                            }
-                        }
-
-                        else if(nearbyNode.pstruct->pathStatus == Status::closedlist){
-                            std::deque<Node>::iterator it = std::find(closedList.begin(),closedList.end(), nearbyNode);
-                            if( (*it).givenCost > nearbyNode.pstruct->tile->getValue() + currentNode.givenCost ){ // old node is slechter
-                                closedList.erase(it); //remove old node
-                                openList.push_front(nearbyNode); //add to open list
-                                nearbyNode.pstruct->pathStatus = Status::openlist;
-                            } //else old node is beter, keep old node, don't add new node
-                        }
-
-
-
-                    }
-                }
-            }
-
-        }
-
-
-        openList.pop_back();//delete currentNode from open
-        closedList.push_back(currentNode); //add current node to closed
-        currentNode.pstruct->pathStatus = Status::closedlist;
-
-        std::sort(openList.begin(),openList.end(),CompareNode); //sort the open list on final cost
-    }
-
+std::deque<Node> PathFinder::AStarSolution()
+{
+    Node currentNode = openList.back();
     // sollution should be found now
     if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // oplossing gevonden
         while(currentNode.parent != nullptr){
@@ -171,6 +179,21 @@ std::deque<Node> PathFinder::RunAStar()
         currentNode.pstruct->pathStatus = Status::solution;
     } //else geen oplossing, resultList is leeg
     return resultList;
+
+}
+
+std::deque<Node> PathFinder::RunAStar()
+{
+    AStarInit();
+
+    //step 3
+    while(!openList.empty()){
+        if(RunAStarStep())
+            break;
+    }
+
+    return AStarSolution();
+
 }
 
 float PathFinder::calcHeuristicScore(int x, int y) // distance to end point

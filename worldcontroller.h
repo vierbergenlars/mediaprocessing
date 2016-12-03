@@ -7,6 +7,7 @@
 #include <QString>
 #include <QGraphicsScene>
 #include <deque>
+class PathFinder;
 
 enum Status {none, openlist, closedlist, solution};
 typedef struct PStruct {
@@ -26,8 +27,10 @@ public:
     void moveProtagonist(int rows, int cols);
     int range;
     int scale;
-    void findPath();
+    bool debugMode = false;
+    void doPathfinderStep();
 private:
+    PathFinder *path;
     Matrix<std::shared_ptr<PStruct>> *tiles;
     std::shared_ptr<Protagonist> protagonist;
     std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> getTilesAroundProtagonist();
