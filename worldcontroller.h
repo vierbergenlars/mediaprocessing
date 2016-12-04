@@ -6,6 +6,7 @@
 #include <world.h>
 #include <QString>
 #include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
 #include <deque>
 class PathFinder;
 
@@ -30,6 +31,7 @@ public:
     bool debugMode = false;
     void doPathfinderStep();
 private:
+    QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
     Matrix<std::shared_ptr<PStruct>> *tiles;
     std::shared_ptr<Protagonist> protagonist;
