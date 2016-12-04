@@ -4,6 +4,7 @@
 #include "pathfinder.h"
 #include <chrono>
 #include <QDebug>
+#include <QImage>
 WorldController::WorldController()
     : range(20), scale(10)
 {
@@ -15,6 +16,8 @@ void WorldController::createWorld(QString file)
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
     tiles = new DenseMatrix<std::shared_ptr<PStruct>>(world.getRows(), world.getCols());
+
+    backgroundImage = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(file)));
 
     for(std::unique_ptr<Tile> &tile: tilesList) {
         int row = tile->getYPos();
@@ -62,14 +65,15 @@ std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> WorldController::getTilesAroun
 void WorldController::render(QGraphicsScene& scene)
 {
     auto tilesAroundProtagonist = getTilesAroundProtagonist();
+    auto firstTile = tilesAroundProtagonist->begin();
+    backgroundImage->setScale(scale);
+    if(debugMode)
+        backgroundImage->setPos(-range*scale, -range*scale);
+    else
+        backgroundImage->setPos(-protagonist->getXPos()*scale,-protagonist->getYPos()*scale) ;
+    scene.addItem(backgroundImage);
 
     for(const auto &pstruct: *tilesAroundProtagonist) {
-        auto tile = pstruct.value->tile;
-        GraphicsTile* gtile = new GraphicsTile(tile);
-        gtile->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
-        gtile->setScale(scale);
-        gtile->setZValue(1);
-        scene.addItem(gtile);
 
         auto status = pstruct.value->pathStatus;
 
