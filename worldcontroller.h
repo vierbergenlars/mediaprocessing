@@ -29,6 +29,7 @@ public:
     int scale;
     bool debugMode = false;
     void doPathfinderStep();
+    void doPathfinder();
 private:
     PathFinder *path;
     Matrix<std::shared_ptr<PStruct>> *tiles;

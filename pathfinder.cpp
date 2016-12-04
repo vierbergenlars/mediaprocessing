@@ -71,14 +71,25 @@ std::deque<Node> PathFinder::Run()
     } //else geen oplossing, resultList is leeg
     return resultList;
 }
-
+Node solutionNode;
+bool solutionFound = false;
 bool PathFinder::RunAStarStep()
 {
+    if(solutionFound)return true;
     Node currentNode;
     //3.1 +3.2
-    currentNode = openList.back(); //get the best node form open List
+    auto currentNodeIterator = std::max_element(openList.begin(), openList.end(), CompareNode);
+    currentNode = *currentNodeIterator; //get the best node form open List
+
+    openList.erase(currentNodeIterator);//delete currentNode from open
+
+    closedList.push_back(currentNode); //add current node to closed
+    currentNode.pstruct->pathStatus = Status::closedlist;
+
     if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // the current node is the solution node
-        return true;
+        solutionNode = currentNode;
+        solutionFound = true;
+        return solutionFound;
     }
 
     //std::cout << "Best node: " << currentNode.x << ", " << currentNode.y << std::endl;
@@ -142,11 +153,10 @@ bool PathFinder::RunAStarStep()
     }
 
 
-    openList.pop_back();//delete currentNode from open
-    closedList.push_back(currentNode); //add current node to closed
-    currentNode.pstruct->pathStatus = Status::closedlist;
 
-    std::sort(openList.begin(),openList.end(),CompareNode); //sort the open list on final cost
+
+
+    //std::sort(openList.begin(),openList.end(),CompareNode); //sort the open list on final cost
     return false;
 
 }
@@ -167,7 +177,7 @@ void PathFinder::AStarInit()
 
 std::deque<Node> PathFinder::AStarSolution()
 {
-    Node currentNode = openList.back();
+    Node currentNode = solutionNode;
     // sollution should be found now
     if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // oplossing gevonden
         while(currentNode.parent != nullptr){

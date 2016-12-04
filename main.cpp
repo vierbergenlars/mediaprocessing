@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
     }
     mainWindow.show();
 
+   controller.doPathfinder();
+
 
     return a.exec();
 }
