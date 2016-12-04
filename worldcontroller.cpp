@@ -136,10 +136,13 @@ void WorldController::moveProtagonist(int x, int y)
 }
 
 // random bullshit pls ignore
-void WorldController::doPathfinderStep()
+bool WorldController::doPathfinderStep()
 {
-    if(path->RunAStarStep())
+    if(path->RunAStarStep()) {
         path->AStarSolution();
+        return true;
+    }
+    return false;
 }
 void WorldController::doPathfinder()
 {
