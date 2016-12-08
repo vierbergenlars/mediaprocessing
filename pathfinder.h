@@ -67,7 +67,7 @@ private:
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);
     Matrix<std::shared_ptr<PStruct>>* _matrix;
-    my_priority_queue<Node,std::deque<Node>, CompareNode> openList;
+    std::priority_queue<Node,std::deque<Node>, CompareNode> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;
     int _xstart;

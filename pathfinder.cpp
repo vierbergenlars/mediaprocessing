@@ -19,14 +19,16 @@ bool PathFinder::RunAStarStep()
 
     do {
         currentNode = openList.top(); //get the best node form open List
+        if(openList.size() > 1) openList.pop();//delete currentNode from open
+        else{
+            return true;}
 
-        openList.pop();//delete currentNode from open
 
     } while(currentNode.pstruct->pathStatus == Status::closedlist);
 
 
-    closedList.push_back(currentNode); //add current node to closed
-    currentNode.pstruct->pathStatus = Status::closedlist;
+
+    currentNode.pstruct->pathStatus = Status::closedlist; // set currentNode to closed
 
     if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // the current node is the solution node
         solutionNode = currentNode;
@@ -53,16 +55,9 @@ bool PathFinder::RunAStarStep()
 
                 if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
 
-
-                    // bool found = std::find(openList.begin(), openList.end(), nearbyNode) != openList.end();
-                    // if true, dan al in open lijst
-                    // if(!found) found = std::find(closedList.begin(), closedList.end(), nearbyNode) != closedList.end();// check in closedList
-
-
-
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
-                    nearbyNode.givenCost = currentNode.givenCost + (1-nearbyNode.pstruct->tile->getValue());
-                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10;
+                    nearbyNode.givenCost = currentNode.givenCost + (1-nearbyNode.pstruct->tile->getValue()) +0.01;
+                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)*0.01;
                     //std::cout << nearbyNode.x << ", " << nearbyNode.y <<" GivenCost: " << nearbyNode.givenCost << " FinalCost: " << nearbyNode.finalCost << std::endl;
                     if( nearbyNode.pstruct->pathStatus != Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
@@ -87,33 +82,35 @@ bool PathFinder::RunAStarStep()
 
 void PathFinder::AStarInit()
 {
-    //step 1 Breadth-First
+
     Node startNode;
     startNode.parent = nullptr;
     startNode.finalCost = 0;
     startNode.givenCost = 0;
     startNode.pstruct = _matrix->get(_ystart,_xstart);
 
-    //step 2
+
     openList.push(startNode);
     startNode.pstruct->pathStatus = Status::openlist;
 }
 
 std::deque<Node> PathFinder::AStarSolution()
 {
-    Node currentNode = solutionNode;
-    // sollution should be found now
-    if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // oplossing gevonden
-        while(currentNode.parent != nullptr){
+    if(solutionFound){
+        Node currentNode = solutionNode;
+        // sollution should be found now
+        if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // oplossing gevonden
+            while(currentNode.parent != nullptr){
+                resultList.push_front(currentNode);
+                currentNode.pstruct->pathStatus = Status::solution;
+                currentNode = *(currentNode.parent);
+            }
             resultList.push_front(currentNode);
             currentNode.pstruct->pathStatus = Status::solution;
-            currentNode = *(currentNode.parent);
-        }
-        resultList.push_front(currentNode);
-        currentNode.pstruct->pathStatus = Status::solution;
-    } //else geen oplossing, resultList is leeg
-    return resultList;
-
+        } //else geen oplossing, resultList is leeg
+        return resultList;
+    }
+    else{ return std::deque<Node>(0);}
 }
 
 std::deque<Node> PathFinder::RunAStar()
@@ -132,7 +129,7 @@ std::deque<Node> PathFinder::RunAStar()
 
 float PathFinder::calcHeuristicScore(int x, int y) // distance to end point
 {
-    return sqrtf(pow(x-_xend,2) + pow(y-_yend,2));
+    return (abs(x-_xend)+abs(y-_yend));
 }
 
 
