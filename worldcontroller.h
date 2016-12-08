@@ -29,7 +29,7 @@ public:
     int range;
     int scale;
     bool debugMode = false;
-    void doPathfinderStep();
+    bool doPathfinderStep();
     void doPathfinder();
 private:
     QGraphicsPixmapItem *backgroundImage;

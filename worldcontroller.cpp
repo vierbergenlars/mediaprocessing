@@ -77,25 +77,28 @@ void WorldController::render(QGraphicsScene& scene)
 
         auto status = pstruct.value->pathStatus;
 
-        QGraphicsRectItem* rect = new QGraphicsRectItem;
-        rect->setRect(0,0,1,1);
-        rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
-        rect->setScale(scale);
-        rect->setZValue(4);
-        rect->setPen(Qt::NoPen);
-        rect->setOpacity(0.2);
-        switch(status) {
-        case openlist:
-            rect->setBrush(QBrush(Qt::darkYellow));
-            break;
-        case closedlist:
-            rect->setBrush(QBrush(Qt::blue));
-            break;
-        case solution:
-            rect->setBrush(QBrush(Qt::green));
-            break;
+        if(status != none) {
+            QGraphicsRectItem* rect = new QGraphicsRectItem;
+            rect->setRect(0,0,1,1);
+            rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+            rect->setScale(scale);
+            rect->setZValue(4);
+            rect->setPen(Qt::NoPen);
+            rect->setOpacity(0.2);
+            switch(status) {
+            case openlist:
+                rect->setBrush(QBrush(Qt::darkYellow));
+                break;
+            case closedlist:
+                rect->setBrush(QBrush(Qt::blue));
+                break;
+            case solution:
+                rect->setOpacity(0.5);
+                rect->setBrush(QBrush(Qt::green));
+                break;
+            }
+            scene.addItem(rect);
         }
-        scene.addItem(rect);
 
         auto enemy = pstruct.value->enemy;
         if(enemy != nullptr) {
@@ -133,10 +136,13 @@ void WorldController::moveProtagonist(int x, int y)
 }
 
 // random bullshit pls ignore
-void WorldController::doPathfinderStep()
+bool WorldController::doPathfinderStep()
 {
-    if(path->RunAStarStep())
+    if(path->RunAStarStep()) {
         path->AStarSolution();
+        return true;
+    }
+    return false;
 }
 void WorldController::doPathfinder()
 {

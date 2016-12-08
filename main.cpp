@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     try {
         mainWindow.createWorld(argv[1]);
-    } catch(const QString &err) {
+    } catch(consst QString &err) {
         std::cerr << err.toStdString() << std::endl;
         return 2;
     }
