@@ -67,10 +67,7 @@ void WorldController::render(QGraphicsScene& scene)
     auto tilesAroundProtagonist = getTilesAroundProtagonist();
     auto firstTile = tilesAroundProtagonist->begin();
     backgroundImage->setScale(scale);
-    if(debugMode)
-        backgroundImage->setPos(-range*scale, -range*scale);
-    else
-        backgroundImage->setPos(-protagonist->getXPos()*scale,-protagonist->getYPos()*scale) ;
+    backgroundImage->setPos(0, 0);
     scene.addItem(backgroundImage);
 
     for(const auto &pstruct: *tilesAroundProtagonist) {
@@ -80,7 +77,7 @@ void WorldController::render(QGraphicsScene& scene)
         if(status != none) {
             QGraphicsRectItem* rect = new QGraphicsRectItem;
             rect->setRect(0,0,1,1);
-            rect->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+            rect->setPos(pstruct.value->tile->getXPos()*scale, pstruct.value->tile->getYPos()*scale);
             rect->setScale(scale);
             rect->setZValue(4);
             rect->setPen(Qt::NoPen);
@@ -103,7 +100,7 @@ void WorldController::render(QGraphicsScene& scene)
         auto enemy = pstruct.value->enemy;
         if(enemy != nullptr) {
             GraphicsEnemy* genemy = new GraphicsEnemy(enemy);
-            genemy->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+            genemy->setPos(enemy->getXPos()*scale, enemy->getYPos()*scale);
             genemy->setScale(scale);
             genemy->setZValue(2);
             scene.addItem(genemy);
@@ -111,7 +108,7 @@ void WorldController::render(QGraphicsScene& scene)
         auto healthpack = pstruct.value->healthpack;
         if(healthpack != nullptr) {
             GraphicsHealthpack* ghealthpack = new GraphicsHealthpack(healthpack);
-            ghealthpack->setPos(pstruct.col*scale - range*scale, pstruct.row*scale - range*scale);
+            ghealthpack->setPos(healthpack->getXPos()*scale, healthpack->getYPos()*scale);
             ghealthpack->setScale(scale);
             ghealthpack->setZValue(2);
             scene.addItem(ghealthpack);
@@ -119,7 +116,7 @@ void WorldController::render(QGraphicsScene& scene)
     }
 
     GraphicsProtagonist* gprotagonist = new GraphicsProtagonist(protagonist);
-    gprotagonist->setPos(0, 0);
+    gprotagonist->setPos(protagonist->getXPos()*scale, protagonist->getYPos()*scale);
     gprotagonist->setScale(scale);
     gprotagonist->setZValue(3);
     scene.addItem(gprotagonist);
