@@ -72,7 +72,7 @@ void WorldController::render(QGraphicsScene& scene)
 
     for(const auto &pstruct: *tilesAroundProtagonist) {
 
-        auto status = pstruct.value->pathStatus;
+        auto status = pstruct->pathStatus;
 
         if(status != none) {
             QGraphicsRectItem* rect = new QGraphicsRectItem;
@@ -97,7 +97,7 @@ void WorldController::render(QGraphicsScene& scene)
             scene.addItem(rect);
         }
 
-        auto enemy = pstruct.value->enemy;
+        auto enemy = pstruct->enemy;
         if(enemy != nullptr) {
             GraphicsEnemy* genemy = new GraphicsEnemy(enemy);
             genemy->setPos(enemy->getXPos()*scale, enemy->getYPos()*scale);
@@ -105,7 +105,8 @@ void WorldController::render(QGraphicsScene& scene)
             genemy->setZValue(2);
             scene.addItem(genemy);
         }
-        auto healthpack = pstruct.value->healthpack;
+
+        auto healthpack = pstruct->healthpack;
         if(healthpack != nullptr) {
             GraphicsHealthpack* ghealthpack = new GraphicsHealthpack(healthpack);
             ghealthpack->setPos(healthpack->getXPos()*scale, healthpack->getYPos()*scale);

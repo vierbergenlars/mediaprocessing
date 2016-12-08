@@ -233,12 +233,6 @@ template<class T>
 class MatrixIterator
 {
 public:
-    typedef struct Value {
-        T value;
-        int row;
-        int col;
-    } Value;
-
     MatrixIterator(Matrix<T> *matrix, int rowPos, int colPos):
         matrix(matrix), colPos(colPos), rowPos(rowPos)
     {
@@ -270,9 +264,9 @@ public:
         return *this;
     }
 
-    const Value operator*() const
+    const T& operator*() const
     {
-        return {matrix->get(rowPos, colPos),rowPos,colPos};
+        return matrix->get(rowPos, colPos);
     }
 
 protected:
