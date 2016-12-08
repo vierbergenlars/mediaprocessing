@@ -8,16 +8,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <deque>
+#include "worldtile.h"
 class PathFinder;
-
-enum Status {none, openlist, closedlist, solution};
-typedef struct PStruct {
-    std::shared_ptr<Tile> tile;
-    std::shared_ptr<Enemy> enemy;
-    std::shared_ptr<Tile> healthpack;
-
-    Status pathStatus;
-} PStruct;
 
 class WorldController
 {
@@ -34,9 +26,9 @@ public:
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
-    Matrix<std::shared_ptr<PStruct>> *tiles;
+    Matrix<WorldTile> *tiles;
     std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> getTilesAroundProtagonist();
+    std::unique_ptr<Matrix<WorldTile>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H
