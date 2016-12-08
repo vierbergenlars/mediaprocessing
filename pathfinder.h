@@ -64,6 +64,9 @@ public:
     bool RunAStarStep();
     std::deque<Node> AStarSolution();
 private:
+    Node currentBestNode;
+    Node solutionNode;
+    bool solutionFound = false;
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);
     Matrix<std::shared_ptr<PStruct>>* _matrix;

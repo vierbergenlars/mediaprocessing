@@ -9,8 +9,6 @@ PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::s
 }
 
 
-Node solutionNode;
-bool solutionFound = false;
 bool PathFinder::RunAStarStep()
 {
     if(solutionFound)return true;
