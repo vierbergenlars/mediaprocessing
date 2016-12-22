@@ -16,10 +16,6 @@ float givenCost = 0;
 int x =0; // maakt debuggen makkelijker
 int y = 0;
 
-bool operator==(const Node& a) const  // nodig voor std::find
-    {
-        return (pstruct->tile == a.pstruct->tile);
-    }
 
 };
 
@@ -30,29 +26,7 @@ struct CompareNode{ // compare function used for priority queue
     }
 };
 
-template<typename T, class Container, class Compare>
-class my_priority_queue : public std::priority_queue<T, std::deque<T>, Compare> //wrapper for priority queue that adds find and remove functions
-{
-public:
 
-   bool erase(typename std::deque<T>::iterator it){
-       if (it != this->c.end()) {
-           this->c.erase(it);
-           std::make_heap(this->c.begin(), this->c.end(), this->comp); // at most 3*N complexity
-           return true;
-       }
-       else {
-           return false;
-       }
-   };
-   typename std::deque<T>::iterator find(const T& node){
-       return std::find(this->c.begin(),this->c.end(), node);
-   };
-
-   void update(){
-       std::push_heap(this->c.begin(),this->c.end(),this->comp);
-   }
-};
 
 class PathFinder
 {

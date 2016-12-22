@@ -5,6 +5,8 @@
 #include <chrono>
 #include <QDebug>
 #include <QImage>
+
+
 WorldController::WorldController()
     : range(20), scale(10)
 {
@@ -45,7 +47,7 @@ void WorldController::createWorld(QString file)
     }
 
     protagonist = std::move(world.getProtagonist());
-    path = new PathFinder(5,5, 493, 493, tiles); //world map 990 937
+    path = new PathFinder(5,5, 990, 937, tiles); //world map 990 937
     path->AStarInit();
 }
 
@@ -64,6 +66,7 @@ std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> WorldController::getTilesAroun
 
 void WorldController::render(QGraphicsScene& scene)
 {
+
     auto tilesAroundProtagonist = getTilesAroundProtagonist();
     auto firstTile = tilesAroundProtagonist->begin();
     backgroundImage->setScale(scale);
@@ -151,9 +154,16 @@ void WorldController::doPathfinder()
         path->RunAStar();
         std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        qDebug() << duration << "ms";
+        qDebug() << duration << "µs";
 
 }
+float getProtagonistEnergy(){
+    return Protagonist.getEnergy();
+}
+float getProtagonistHealth(){
+    return Protagonist.getHealth();
+}
+
 
 
 

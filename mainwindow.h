@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QString>
 #include "worldcontroller.h"
+#include <qprogressbar.h>
 
 class MainWindow : public QMainWindow
 {
@@ -17,6 +18,8 @@ public:
 private:
     WorldController &controller;
     QGraphicsView mainView;
+    QProgressBar *energyBar;
+    QProgressBar *healthBar;
 };
 
 #endif // MAINWINDOW_H

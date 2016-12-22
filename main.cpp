@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
     WorldController controller;
     MainWindow mainWindow(controller);
 
+
+
     if(argc < 2) {
         std::cerr << "Pass the world file to use as first parameter" << std::endl;
         return 1;

@@ -5,6 +5,14 @@
 MainWindow::MainWindow(WorldController &controller, QWidget *parent) :
     QMainWindow(parent), mainView(this), controller(controller)
 {
+    energyBar = new QProgressBar(&mainView);
+    energyBar->setGeometry(QRect(100,10,120,25));
+
+    energyBar->setValue(0);
+
+    healthBar = new QProgressBar(&mainView);
+    healthBar->setGeometry(QRect(230,10,120,25));
+    healthBar->setValue(0);
     this->setCentralWidget(&mainView);
     mainView.show();
 }
@@ -78,7 +86,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F:
         controller.debugMode=!controller.debugMode;
     }
-
+    energyBar->setValue(50.3); // maak hier nog functies voor in controller
+    healthBar->setValue(33); //
     QGraphicsScene* prevScene = mainView.scene();
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
     controller.render(*scene);
