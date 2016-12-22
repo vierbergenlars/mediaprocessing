@@ -2,15 +2,13 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<PStruct>>* matrix):
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix):
     _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix)
 {
 
 }
 
 
-Node solutionNode;
-bool solutionFound = false;
 bool PathFinder::RunAStarStep()
 {
     if(solutionFound)return true;
@@ -23,14 +21,15 @@ bool PathFinder::RunAStarStep()
         else{
             return true;}
 
+        openList.pop();//delete currentNode from open
 
-    } while(currentNode.pstruct->pathStatus == Status::closedlist);
+    } while(currentNode.tile->status() == WorldTile::Status::closedlist);
 
 
+    closedList.push_back(currentNode); //add current node to closed
+    currentNode.tile->setStatus(WorldTile::Status::closedlist);
 
-    currentNode.pstruct->pathStatus = Status::closedlist; // set currentNode to closed
-
-    if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // the current node is the solution node
+    if (currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // the current node is the solution node
         solutionNode = currentNode;
         solutionFound = true;
         return solutionFound;
@@ -45,23 +44,22 @@ bool PathFinder::RunAStarStep()
         for(int j=-1; j <= 1; j++){
             if(i==0 && j==0) continue;// no need to do the current node all over again.
             if(!(i==0 || j==0)) continue; // no diagonals
-            int x = currentNode.pstruct->tile->getXPos() +i;
-            int y = currentNode.pstruct->tile->getYPos() +j;
+            int x = currentNode.tile->getX() +i;
+            int y = currentNode.tile->getY() +j;
 
             if(_matrix->contains(y,x)){ //positie in range of matrix
                 Node nearbyNode;
-                nearbyNode.pstruct = _matrix->get(y,x);
+                nearbyNode.tile = _matrix->get(y,x);
                 nearbyNode.x = x;nearbyNode.y = y;
 
-                if(!std::isinf(nearbyNode.pstruct->tile->getValue())){ // if passable
+                if(!std::isinf(nearbyNode.tile->getDifficulty())){ // if passable
 
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
-                    nearbyNode.givenCost = currentNode.givenCost + (1-nearbyNode.pstruct->tile->getValue()) +0.01;
-                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)*0.01;
-                    //std::cout << nearbyNode.x << ", " << nearbyNode.y <<" GivenCost: " << nearbyNode.givenCost << " FinalCost: " << nearbyNode.finalCost << std::endl;
-                    if( nearbyNode.pstruct->pathStatus != Status::closedlist){ //  if not already in Lists
+                    nearbyNode.givenCost = currentNode.givenCost + nearbyNode.tile->getDifficulty();
+                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10;
+                    if( nearbyNode.tile->status()!= WorldTile::Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
-                        nearbyNode.pstruct->pathStatus = Status::openlist;
+                        nearbyNode.tile->setStatus(WorldTile::Status::openlist);
                     }
 
 
@@ -82,35 +80,33 @@ bool PathFinder::RunAStarStep()
 
 void PathFinder::AStarInit()
 {
-
+    //step 1 Breadth-First
     Node startNode;
     startNode.parent = nullptr;
     startNode.finalCost = 0;
     startNode.givenCost = 0;
-    startNode.pstruct = _matrix->get(_ystart,_xstart);
+    startNode.tile = _matrix->get(_ystart,_xstart);
 
-
+    //step 2
     openList.push(startNode);
-    startNode.pstruct->pathStatus = Status::openlist;
+    startNode.tile->setStatus(WorldTile::Status::openlist);
 }
 
 std::deque<Node> PathFinder::AStarSolution()
 {
-    if(solutionFound){
-        Node currentNode = solutionNode;
-        // sollution should be found now
-        if (currentNode.pstruct->tile->getXPos() == _xend && currentNode.pstruct->tile->getYPos()== _yend){ // oplossing gevonden
-            while(currentNode.parent != nullptr){
-                resultList.push_front(currentNode);
-                currentNode.pstruct->pathStatus = Status::solution;
-                currentNode = *(currentNode.parent);
-            }
+    Node currentNode = solutionNode;
+    // sollution should be found now
+    if (currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // oplossing gevonden
+        while(currentNode.parent != nullptr){
             resultList.push_front(currentNode);
-            currentNode.pstruct->pathStatus = Status::solution;
-        } //else geen oplossing, resultList is leeg
-        return resultList;
-    }
-    else{ return std::deque<Node>(0);}
+            currentNode.tile->setStatus(WorldTile::Status::solution);
+            currentNode = *(currentNode.parent);
+        }
+        resultList.push_front(currentNode);
+        currentNode.tile->setStatus(WorldTile::Status::solution);
+    } //else geen oplossing, resultList is leeg
+    return resultList;
+
 }
 
 std::deque<Node> PathFinder::RunAStar()

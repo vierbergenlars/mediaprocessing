@@ -3,21 +3,20 @@
 
 #include<world.h>
 #include <matrix.h>
-#include "worldcontroller.h"
+#include "worldtile.h"
 #include <queue>
 #include <deque>
 
 
-typedef struct Node{
-std::shared_ptr<PStruct> pstruct;
+struct Node{
+    std::shared_ptr<WorldTile> tile;
 std::shared_ptr<Node> parent;
 float finalCost = 0;
 float givenCost = 0;
 int x =0; // maakt debuggen makkelijker
 int y = 0;
-
-
 };
+
 
 struct CompareNode{ // compare function used for priority queue
     bool operator()(Node const & p1, Node const & p2) {
@@ -27,20 +26,22 @@ struct CompareNode{ // compare function used for priority queue
 };
 
 
-
 class PathFinder
 {
 public:
-    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<PStruct>>* matrix);
+    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
     void AStarInit();
     bool RunAStarStep();
     std::deque<Node> AStarSolution();
 private:
+    Node currentBestNode;
+    Node solutionNode;
+    bool solutionFound = false;
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);
-    Matrix<std::shared_ptr<PStruct>>* _matrix;
+    Matrix<std::shared_ptr<WorldTile>>* _matrix;
     std::priority_queue<Node,std::deque<Node>, CompareNode> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;

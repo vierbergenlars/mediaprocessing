@@ -8,23 +8,16 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <deque>
+#include "worldtile.h"
+#include "graphicstile.h"
 class PathFinder;
-
-enum Status {none, openlist, closedlist, solution};
-typedef struct PStruct {
-    std::shared_ptr<Tile> tile;
-    std::shared_ptr<Enemy> enemy;
-    std::shared_ptr<Tile> healthpack;
-
-    Status pathStatus;
-} PStruct;
 
 class WorldController
 {
 public:
-    WorldController();
+    WorldController(QGraphicsScene*scene);
     void createWorld(QString world);
-    void render(QGraphicsScene &scene);
+    void render();
     void moveProtagonist(int rows, int cols);
     int range;
     int scale;
@@ -34,9 +27,11 @@ public:
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
-    Matrix<std::shared_ptr<PStruct>> *tiles;
+    QGraphicsScene *scene;
+    Matrix<std::shared_ptr<WorldTile>> *tiles;
+    std::vector<GraphicsPosition*> positions;
     std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<std::shared_ptr<PStruct>>> getTilesAroundProtagonist();
+    std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H
