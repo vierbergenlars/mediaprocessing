@@ -30,6 +30,11 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
     statusRect->setZValue(4);
     statusRect->setPen(Qt::NoPen);
 
+    poisonRect = new QGraphicsRectItem(this);
+    poisonRect->setRect(0,0,1,1);
+    poisonRect->setPen(Qt::NoPen);
+
+
     itemEllipse = new QGraphicsEllipseItem(this);
     itemEllipse->setRect(0, 0, 1, 1);
     itemEllipse->setPen(Qt::NoPen);
@@ -92,6 +97,14 @@ void GraphicsPosition::update()
     } else {
         itemEllipse->setBrush(QBrush(Qt::transparent));
         itemText->setText("");
+    }
+
+    float poisonEffect = tile->getPoisonEffect();
+    if(poisonEffect > 0) {
+        poisonRect->setBrush(QBrush(QColor(0xff, 0, 0xff)));
+        poisonRect->setOpacity(poisonEffect/100);
+    } else {
+        poisionRect->setBrush(Qt::transparent);
     }
 }
 
