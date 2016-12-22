@@ -85,6 +85,10 @@ void GraphicsPosition::update()
             itemEllipse->setBrush(QBrush(Qt::red));
             itemText->setText(QString::number(enemy->getValue()));
         }
+        if(enemy->getDefeated()) {
+            itemEllipse->setBrush(QBrush(Qt::gray));
+            itemText->setText(itemText->text()+ " (dead)");
+        }
     } else {
         itemEllipse->setBrush(QBrush(Qt::transparent));
         itemText->setText("");
