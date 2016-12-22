@@ -4,7 +4,7 @@
 #include <cmath>
 
 WorldTile::WorldTile(std::shared_ptr<Tile> tile):
-    _tile(tile), _status(WorldTile::Status::none), _enemy(nullptr), _healthpack(nullptr)
+    _tile(tile), _status(WorldTile::Status::none), _enemy(nullptr)
 {
 
 }
@@ -65,7 +65,7 @@ float WorldTile::getHealthEffect() const
     return healthEffect;
 }
 
-void depleteHealthpack()
+void WorldTile::depleteHealthpack()
 {
     _healthpack = 0;
 }
