@@ -18,9 +18,9 @@ void WorldTile::setEnemy(std::shared_ptr<Enemy> enemy)
 
 void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
 {
-    assert(_healthpack == nullptr);
+    assert(_healthpack == 0);
     assert(healthpack->getXPos() == getX() && healthpack->getYPos() == getY());
-    _healthpack = healthpack;
+    _healthpack = healthpack->getValue();
 }
 
 void WorldTile::setStatus(WorldTile::Status status)
@@ -54,19 +54,20 @@ float WorldTile::getDifficulty() const
 
 float WorldTile::getHealthpack() const
 {
-    if(_healthpack == nullptr)
-        return 0;
-    return _healthpack->getValue();
+    return _healthpack;
 }
 
 float WorldTile::getHealthEffect() const
 {
-    float healthEffect = 0;
-    if(_healthpack != nullptr)
-        healthEffect+=_healthpack->getValue();
+    float healthEffect = getHealthpack();
     if(_enemy != nullptr)
         healthEffect-=_enemy->getValue();
     return healthEffect;
+}
+
+void depleteHealthpack()
+{
+    _healthpack = 0;
 }
 
 

@@ -21,13 +21,12 @@ public:
         return _status != none || _enemy != nullptr || _healthpack != nullptr;
     }
     bool graphicsConstructed = false;
-
-    //std::shared_ptr<Tile> healthpack() const;
     std::shared_ptr<Enemy> enemy() const;
+    void depleteHealthpack();
 private:
     std::shared_ptr<Tile> _tile;
     std::shared_ptr<Enemy> _enemy;
-    std::shared_ptr<Tile> _healthpack;
+    float _healthpack = 0;
     Status _status;
 };
 
