@@ -18,7 +18,7 @@ public:
     float getHealthpack() const;
     float getHealthEffect() const;
     bool hasItem() const {
-        return _status != none || _enemy != nullptr || _healthpack != nullptr;
+        return _status != none || _enemy != nullptr || _healthpack != 0;
     }
     bool graphicsConstructed = false;
     std::shared_ptr<Enemy> enemy() const;
