@@ -24,6 +24,9 @@ public:
     bool debugMode = false;
     bool doPathfinderStep();
     void doPathfinder();
+
+    float getProtagonistEnergy();
+    float getProtagonistHealth();
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;

@@ -100,7 +100,11 @@ void WorldController::moveProtagonist(int x, int y)
     int newCol = protagonist->getXPos()+x;
     int newRow = protagonist->getYPos()+y;
     if(tiles->contains(newRow, newCol)) {
+       float newenergy = protagonist->getEnergy() - tiles->get(newRow, newCol)->getDifficulty();
+       if(newenergy>0){
+        protagonist->setEnergy(newenergy);
         protagonist->setPos(newCol, newRow);
+       }
     }
 }
 
@@ -123,11 +127,12 @@ void WorldController::doPathfinder()
         qDebug() << duration << "µs";
 
 }
-float getProtagonistEnergy(){
-    return Protagonist.getEnergy();
+float WorldController::getProtagonistEnergy(){
+
+    return protagonist->getEnergy();
 }
-float getProtagonistHealth(){
-    return Protagonist.getHealth();
+float WorldController::getProtagonistHealth(){
+    return protagonist->getHealth();
 }
 
 

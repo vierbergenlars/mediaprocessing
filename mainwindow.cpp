@@ -87,8 +87,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F:
         controller->debugMode=!controller->debugMode;
     }
-    energyBar->setValue(50.3); // maak hier nog functies voor in controller
-    healthBar->setValue(33); //   
+    energyBar->setValue(controller->getProtagonistEnergy());
+    healthBar->setValue(controller->getProtagonistHealth());
 
     controller->render();
 }
