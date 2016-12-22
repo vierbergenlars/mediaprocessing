@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<WorldTile>* matrix):
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix):
     _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix)
 {
 
@@ -46,7 +46,7 @@ bool PathFinder::RunAStarStep()
 
             if(_matrix->contains(y,x)){ //positie in range of matrix
                 Node nearbyNode;
-                nearbyNode.tile = &_matrix->get(y,x);
+                nearbyNode.tile = _matrix->get(y,x);
                 nearbyNode.x = x;nearbyNode.y = y;
 
                 if(!std::isinf(nearbyNode.tile->getDifficulty())){ // if passable
@@ -76,7 +76,7 @@ void PathFinder::AStarInit()
     startNode.parent = nullptr;
     startNode.finalCost = 0;
     startNode.givenCost = 0;
-    startNode.tile = &_matrix->get(_ystart,_xstart);
+    startNode.tile = _matrix->get(_ystart,_xstart);
 
     //step 2
     openList.push(startNode);

@@ -59,10 +59,16 @@ float WorldTile::getHealthpack() const
     return _healthpack->getValue();
 }
 
-std::shared_ptr<Tile> WorldTile::healthpack() const
+float WorldTile::getHealthEffect() const
 {
-    return _healthpack;
+    float healthEffect = 0;
+    if(_healthpack != nullptr)
+        healthEffect+=_healthpack->getValue();
+    if(_enemy != nullptr)
+        healthEffect-=_enemy->getValue();
+    return healthEffect;
 }
+
 
 std::shared_ptr<Enemy> WorldTile::enemy() const
 {

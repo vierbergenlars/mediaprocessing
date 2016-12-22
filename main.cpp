@@ -18,8 +18,7 @@ int main(int argc, char *argv[])
 {
 
     QApplication a(argc, argv);
-    WorldController controller;
-    MainWindow mainWindow(controller);
+    MainWindow mainWindow;
 
     if(argc < 2) {
         std::cerr << "Pass the world file to use as first parameter" << std::endl;

@@ -269,6 +269,11 @@ public:
         return matrix->get(rowPos, colPos);
     }
 
+    T& operator*()
+    {
+        return matrix->get(rowPos, colPos);
+    }
+
 protected:
     Matrix<T> *matrix;
     int colPos;

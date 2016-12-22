@@ -16,7 +16,13 @@ public:
     int getY() const;
     float getDifficulty() const;
     float getHealthpack() const;
-    std::shared_ptr<Tile> healthpack() const;
+    float getHealthEffect() const;
+    bool hasItem() const {
+        return _status != none || _enemy != nullptr || _healthpack != nullptr;
+    }
+    bool graphicsConstructed = false;
+
+    //std::shared_ptr<Tile> healthpack() const;
     std::shared_ptr<Enemy> enemy() const;
 private:
     std::shared_ptr<Tile> _tile;

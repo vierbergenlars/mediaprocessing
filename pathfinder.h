@@ -9,7 +9,7 @@
 
 
 struct Node{
-    WorldTile* tile;
+    std::shared_ptr<WorldTile> tile;
 std::shared_ptr<Node> parent;
 float finalCost = 0;
 float givenCost = 0;
@@ -29,7 +29,7 @@ struct CompareNode{ // compare function used for priority queue
 class PathFinder
 {
 public:
-    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<WorldTile>* matrix);
+    PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
     void AStarInit();
@@ -41,7 +41,7 @@ private:
     bool solutionFound = false;
     int makeHash(int x, int y){return x<<16 |y;};
     float calcHeuristicScore(int x, int y);
-    Matrix<WorldTile>* _matrix;
+    Matrix<std::shared_ptr<WorldTile>>* _matrix;
     std::priority_queue<Node,std::deque<Node>, CompareNode> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;

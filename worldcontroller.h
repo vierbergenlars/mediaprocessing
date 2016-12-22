@@ -9,14 +9,15 @@
 #include <QGraphicsPixmapItem>
 #include <deque>
 #include "worldtile.h"
+#include "graphicstile.h"
 class PathFinder;
 
 class WorldController
 {
 public:
-    WorldController();
+    WorldController(QGraphicsScene*scene);
     void createWorld(QString world);
-    void render(QGraphicsScene &scene);
+    void render();
     void moveProtagonist(int rows, int cols);
     int range;
     int scale;
@@ -26,9 +27,11 @@ public:
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
-    Matrix<WorldTile> *tiles;
+    QGraphicsScene *scene;
+    Matrix<std::shared_ptr<WorldTile>> *tiles;
+    std::vector<GraphicsPosition*> positions;
     std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<WorldTile>> getTilesAroundProtagonist();
+    std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H

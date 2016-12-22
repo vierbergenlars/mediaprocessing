@@ -11,11 +11,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(WorldController & controller, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     void createWorld(QString file);
     virtual void keyPressEvent(QKeyEvent* event) override;
 private:
-    WorldController &controller;
+    WorldController *controller;
     QGraphicsView mainView;
 };
 

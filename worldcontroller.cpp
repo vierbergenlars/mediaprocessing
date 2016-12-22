@@ -5,8 +5,9 @@
 #include <chrono>
 #include <QDebug>
 #include <QImage>
-WorldController::WorldController()
-    : range(20), scale(10)
+
+WorldController::WorldController(QGraphicsScene *scene)
+    : range(20), scale(10), scene(scene)
 {
 }
 
@@ -15,27 +16,38 @@ void WorldController::createWorld(QString file)
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
-    tiles = new DenseMatrix<WorldTile>(world.getRows(), world.getCols());
+    tiles = new DenseMatrix<std::shared_ptr<WorldTile>>(world.getRows(), world.getCols());
 
     backgroundImage = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(file)));
+    backgroundImage->setPos(0, 0);
+    scene->addItem(backgroundImage);
 
     for(std::unique_ptr<Tile> &tile: tilesList) {
-        WorldTile wt(std::move(tile));
-        tiles->set(wt.getY(), wt.getX(), wt);
+        std::shared_ptr<WorldTile> wt = std::make_shared<WorldTile>(std::move(tile));
+        tiles->set(wt->getY(), wt->getX(), wt);
     }
 
     auto enemiesList = world.getEnemies(8);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
-        tiles->get(row, col).setEnemy(std::move(enemy));
+        tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
     auto healthpacksList = world.getHealthPacks(8);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();
-        tiles->get(row, col).setHealthpack(std::move(healthpack));
+        tiles->get(row, col)->setHealthpack(std::move(healthpack));
+    }
+
+    for(std::shared_ptr<WorldTile> & t: *tiles) {
+        if(!t->hasItem() || t->graphicsConstructed)
+            continue;
+        auto graphicsPos = new GraphicsPosition(t);
+        positions.push_back(graphicsPos);
+        scene->addItem(graphicsPos);
+        t->graphicsConstructed=true;
     }
 
     protagonist = std::move(world.getProtagonist());
@@ -44,7 +56,7 @@ void WorldController::createWorld(QString file)
 }
 
 
-std::unique_ptr<Matrix<WorldTile>> WorldController::getTilesAroundProtagonist()
+std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> WorldController::getTilesAroundProtagonist()
 {
     if(debugMode)
         return tiles->unsafeSlice(0, 0, tiles->rows()-1, tiles->cols()-1);
@@ -56,65 +68,30 @@ std::unique_ptr<Matrix<WorldTile>> WorldController::getTilesAroundProtagonist()
 }
 
 
-void WorldController::render(QGraphicsScene& scene)
+void WorldController::render()
 {
-    auto tilesAroundProtagonist = getTilesAroundProtagonist();
-    auto firstTile = tilesAroundProtagonist->begin();
-    backgroundImage->setScale(scale);
-    backgroundImage->setPos(0, 0);
-    scene.addItem(backgroundImage);
-
-    for(const WorldTile &worldtile: *tilesAroundProtagonist) {
-
-        auto status = worldtile.status();
-
-        if(status != WorldTile::Status::none) {
-            QGraphicsRectItem* rect = new QGraphicsRectItem;
-            rect->setRect(0,0,1,1);
-            rect->setPos(worldtile.getX()*scale, worldtile.getY()*scale);
-            rect->setScale(scale);
-            rect->setZValue(4);
-            rect->setPen(Qt::NoPen);
-            rect->setOpacity(0.2);
-            switch(status) {
-            case WorldTile::Status::openlist:
-                rect->setBrush(QBrush(Qt::darkYellow));
-                break;
-            case WorldTile::Status::closedlist:
-                rect->setBrush(QBrush(Qt::blue));
-                break;
-            case WorldTile::Status::solution:
-                rect->setOpacity(0.5);
-                rect->setBrush(QBrush(Qt::green));
-                break;
-            }
-            scene.addItem(rect);
-        }
-
-        auto enemy = worldtile.enemy();
-        if(enemy != nullptr) {
-            GraphicsEnemy* genemy = new GraphicsEnemy(enemy);
-            genemy->setPos(worldtile.getX()*scale, worldtile.getY()*scale);
-            genemy->setScale(scale);
-            genemy->setZValue(2);
-            scene.addItem(genemy);
-        }
-
-        auto healthpack = worldtile.healthpack();
-        if(healthpack != nullptr) {
-            GraphicsHealthpack* ghealthpack = new GraphicsHealthpack(healthpack);
-            ghealthpack->setPos(healthpack->getXPos()*scale, healthpack->getYPos()*scale);
-            ghealthpack->setScale(scale);
-            ghealthpack->setZValue(2);
-            scene.addItem(ghealthpack);
-        }
+    for(std::shared_ptr<WorldTile> & t: *tiles) {
+        if(!t->hasItem() || t->graphicsConstructed)
+            continue;
+        auto graphicsPos = new GraphicsPosition(t);
+        positions.push_back(graphicsPos);
+        scene->addItem(graphicsPos);
+        t->graphicsConstructed=true;
     }
 
-    GraphicsProtagonist* gprotagonist = new GraphicsProtagonist(protagonist);
+    for(GraphicsPosition *&graphicsPos: positions) {
+        graphicsPos->updateScale(scale);
+        graphicsPos->setZValue(2);
+        graphicsPos->update();
+    }
+    backgroundImage->setScale(scale);
+
+
+    GraphicsProtagonist* gprotagonist = new GraphicsProtagonist();
     gprotagonist->setPos(protagonist->getXPos()*scale, protagonist->getYPos()*scale);
     gprotagonist->setScale(scale);
     gprotagonist->setZValue(3);
-    scene.addItem(gprotagonist);
+    scene->addItem(gprotagonist);
 }
 
 void WorldController::moveProtagonist(int x, int y)

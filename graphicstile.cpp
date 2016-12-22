@@ -3,109 +3,96 @@
 #include <cmath>
 #include <iostream>
 
-GraphicsComponent::GraphicsComponent(const std::shared_ptr<const Tile> & tile, QGraphicsItem *parent):
+GraphicsProtagonist::GraphicsProtagonist(QGraphicsItem *parent):
     QGraphicsItem(parent), boundingBox(this)
 {
-    this->setToolTip(QString::number(tile->getXPos()) + ","+QString::number(tile->getYPos()));
     boundingBox.setRect(0, 0, 1, 1);
     boundingBox.setPen(Qt::NoPen);
     boundingBox.setBrush(Qt::NoBrush);
 }
 
-QRectF GraphicsComponent::boundingRect() const
+QRectF GraphicsProtagonist::boundingRect() const
 {
     return boundingBox.boundingRect();
 }
 
-void GraphicsComponent::showBoundingBox()
+void GraphicsProtagonist::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    boundingBox.setPen(QPen(Qt::magenta, 0));
-}
 
-void GraphicsComponent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    this->doPaint(painter, option, widget);
 }
 
 
-
-GraphicsTile::GraphicsTile(const std::shared_ptr<const Tile> &tile, QGraphicsItem * parent):
-    GraphicsComponent(tile, parent), tileRect(this), tile(tile)
+GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraphicsItem *parent)
+    :QGraphicsItem(parent), tile(tile)
 {
-    tileRect.setRect(0, 0, 1, 1);
-    tileRect.setPen(Qt::NoPen);
-    QColor color;
-    if(std::isinf(tile->getValue())) {
-        color = QColor(Qt::red);
+    statusRect = new QGraphicsRectItem(this);
+    statusRect->setRect(0,0,1,1);
+    statusRect->setZValue(4);
+    statusRect->setPen(Qt::NoPen);
+
+    itemEllipse = new QGraphicsEllipseItem(this);
+    itemEllipse->setRect(0, 0, 1, 1);
+    itemEllipse->setPen(Qt::NoPen);
+
+    itemText = new QGraphicsSimpleTextItem(this);
+    itemText->setBrush(Qt::white);
+    itemText->setPen(QPen(Qt::black, 0));
+    itemText->setScale(0.1);
+}
+
+QRectF GraphicsPosition::boundingRect() const
+{
+    return QRectF(0,0,1,1);
+
+}
+
+void GraphicsPosition::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+
+}
+
+void GraphicsPosition::update()
+{
+    switch(tile->status()) {
+    case WorldTile::Status::openlist:
+        statusRect->setOpacity(0.2);
+        statusRect->setBrush(QBrush(Qt::darkYellow));
+        break;
+    case WorldTile::Status::closedlist:
+        statusRect->setOpacity(0.2);
+        statusRect->setBrush(QBrush(Qt::blue));
+        break;
+    case WorldTile::Status::solution:
+        statusRect->setOpacity(0.5);
+        statusRect->setBrush(QBrush(Qt::green));
+        break;
+    default:
+        statusRect->setBrush(QBrush(Qt::transparent));
+    }
+
+
+    float healthEffect = tile->getHealthEffect();
+    if(healthEffect > 0) {
+        itemEllipse->setBrush(QBrush(Qt::green));
+        itemText->setText(QString::number(healthEffect));
+    } else if(healthEffect < 0) {
+        std::shared_ptr<const Enemy> enemy = tile->enemy();
+        std::shared_ptr<const PEnemy> penemy = std::dynamic_pointer_cast<const PEnemy>(enemy);
+        if(penemy != nullptr) {
+            itemEllipse->setBrush(QBrush(QColor(0xff, 0, 0xff)));
+            itemText->setText(QString::number(penemy->getValue())+ " P: "+QString::number(penemy->getPoisonLevel()));
+        } else {
+            itemEllipse->setBrush(QBrush(QColor(0, 0xff, 0)));
+            itemText->setText(QString::number(enemy->getValue()));
+        }
     } else {
-        int colorValue(tile->getValue()*0xff);
-        color = QColor(colorValue, colorValue, colorValue);
-    }
-    tileRect.setBrush(QBrush(color));
-}
-
-
-void GraphicsTile::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-}
-
-
-GraphicsEnemy::GraphicsEnemy(const std::shared_ptr<const Enemy> &enemy, QGraphicsItem * parent):
-    GraphicsComponent(enemy, parent), enemyEllipse(this), enemyText(this), enemy(enemy)
-{
-    enemyEllipse.setRect(0, 0, 1, 1);
-    enemyText.setScale(0.1);
-    enemyText.setBrush(Qt::white);
-    enemyText.setPen(QPen(Qt::black, 0));
-    QColor color(0, 0xff, 0);
-
-    // This cast will only succeed when the object in the shared_ptr is an instance of PEnemy
-    // Else it will return nullptr
-    std::shared_ptr<const PEnemy> penemy = std::dynamic_pointer_cast<const PEnemy>(enemy);
-    if(penemy != nullptr) {
-        // Special color for PEnemies
-        color = QColor(0xff, 0, 0xff);
-    }
-    enemyEllipse.setBrush(QBrush(color));
-    enemyEllipse.setPen(Qt::NoPen);
-}
-
-void GraphicsEnemy::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    std::shared_ptr<const PEnemy> penemy = std::dynamic_pointer_cast<const PEnemy>(enemy);
-    if(penemy == nullptr) {
-        enemyText.setText(QString::number(enemy->getValue()));
-    } else {
-        enemyText.setText(QString::number(penemy->getValue())+ " P: "+QString::number(penemy->getPoisonLevel()));
+        itemEllipse->setBrush(QBrush(Qt::transparent));
+        itemText->setText("");
     }
 }
 
-GraphicsHealthpack::GraphicsHealthpack(const std::shared_ptr<const Tile> &tile, QGraphicsItem *parent):
-    GraphicsComponent(tile, parent), hpEllipse(this), hpText(), tile(tile)
+void GraphicsPosition::updateScale(float scale)
 {
-    hpEllipse.setRect(0, 0, 1, 1);
-    hpText.setScale(0.1);
-    hpText.setBrush(Qt::white);
-    hpText.setPen(QPen(Qt::black, 0));
-    hpText.setParentItem(this);
-
-    hpEllipse.setBrush(Qt::red);
-    hpEllipse.setPen(Qt::NoPen);
-}
-
-
-void GraphicsHealthpack::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    hpText.setText(QString::number(tile->getValue()));
-}
-
-GraphicsProtagonist::GraphicsProtagonist(const std::shared_ptr<const Protagonist> &protagonist, QGraphicsItem *parent):
-    GraphicsComponent(protagonist, parent), protagonist(protagonist)
-{
-    this->showBoundingBox();
-}
-
-void GraphicsProtagonist::doPaint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-
+    this->setScale(scale);
+    this->setPos(tile->getX()*scale, tile->getY()*scale);
 }
