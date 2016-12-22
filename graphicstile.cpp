@@ -82,7 +82,7 @@ void GraphicsPosition::update()
             itemEllipse->setBrush(QBrush(QColor(0xff, 0, 0xff)));
             itemText->setText(QString::number(penemy->getValue())+ " P: "+QString::number(penemy->getPoisonLevel()));
         } else {
-            itemEllipse->setBrush(QBrush(QColor(0, 0xff, 0)));
+            itemEllipse->setBrush(QBrush(Qt::red));
             itemText->setText(QString::number(enemy->getValue()));
         }
     } else {
