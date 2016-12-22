@@ -20,6 +20,7 @@ public:
 private:
     const std::shared_ptr<WorldTile> tile;
     QGraphicsRectItem* statusRect;
+    QGraphicsRectItem* poisonRect;
     QGraphicsEllipseItem* itemEllipse;
     QGraphicsSimpleTextItem* itemText;
 };

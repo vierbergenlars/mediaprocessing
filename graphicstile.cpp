@@ -104,7 +104,7 @@ void GraphicsPosition::update()
         poisonRect->setBrush(QBrush(QColor(0xff, 0, 0xff)));
         poisonRect->setOpacity(poisonEffect/100);
     } else {
-        poisionRect->setBrush(Qt::transparent);
+        poisonRect->setBrush(Qt::transparent);
     }
 }
 
