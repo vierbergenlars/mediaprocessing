@@ -54,9 +54,9 @@ void WorldController::createWorld(QString file)
     path = new PathFinder(5,5, 990, 937, tiles); //world map 990 937
     path->AStarInit();
 
-    gProtagonist = new GraphicsProtagonist();
+    gprotagonist = new GraphicsProtagonist();
     gprotagonist->setZValue(3);
-    scene->addItem(gProtagonist);
+    scene->addItem(gprotagonist);
 }
 
 
