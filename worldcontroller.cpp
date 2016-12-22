@@ -53,6 +53,10 @@ void WorldController::createWorld(QString file)
     protagonist = std::move(world.getProtagonist());
     path = new PathFinder(5,5, 990, 937, tiles); //world map 990 937
     path->AStarInit();
+
+    gProtagonist = new GraphicsProtagonist();
+    gprotagonist->setZValue(3);
+    scene->addItem(gProtagonist);
 }
 
 
@@ -87,11 +91,8 @@ void WorldController::render()
     backgroundImage->setScale(scale);
 
 
-    GraphicsProtagonist* gprotagonist = new GraphicsProtagonist();
     gprotagonist->setPos(protagonist->getXPos()*scale, protagonist->getYPos()*scale);
     gprotagonist->setScale(scale);
-    gprotagonist->setZValue(3);
-    scene->addItem(gprotagonist);
 }
 
 void WorldController::moveProtagonist(int x, int y)

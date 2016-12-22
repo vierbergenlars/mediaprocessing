@@ -30,6 +30,7 @@ private:
     QGraphicsScene *scene;
     Matrix<std::shared_ptr<WorldTile>> *tiles;
     std::vector<GraphicsPosition*> positions;
+    GraphicsProtagonist* gprotagonist;
     std::shared_ptr<Protagonist> protagonist;
     std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> getTilesAroundProtagonist();
 };
