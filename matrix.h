@@ -56,6 +56,12 @@ public:
         return this->_get(row, col);
     }
 
+    inline const T& get(int row, int col) const
+    {
+        assert(this->contains(row, col));
+        return this->_get(row, col);
+    }
+
     /**
      * @brief Updates a cell in the matrix
      * @param row Row position to place the element on
@@ -125,7 +131,8 @@ public:
     }
 
 protected:
-    virtual T& _get(int row, int col)  = 0;
+    virtual T& _get(int row, int col) = 0;
+    virtual const T& _get(int row, int col) const = 0;
 
     virtual void _set(int row, int col, const T& object) = 0;
 
@@ -169,6 +176,11 @@ protected:
         return storage[row*this->cols()+col];
     }
 
+    virtual const T &_get(int row, int col) const override
+    {
+        return storage[row*this->cols()+col];
+    }
+
     virtual void _set(int row, int col, const T& object) override
     {
         storage[row*this->cols()+col] = object;
@@ -208,6 +220,11 @@ public:
 
 protected:
     virtual T &_get(int row, int col) override
+    {
+        return matrix->get(_rowStart+row, _colStart+col);
+    }
+
+    virtual const T &_get(int row, int col) const override
     {
         return matrix->get(_rowStart+row, _colStart+col);
     }
