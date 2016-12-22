@@ -7,7 +7,7 @@ GraphicsProtagonist::GraphicsProtagonist(QGraphicsItem *parent):
     QGraphicsItem(parent), boundingBox(this)
 {
     boundingBox.setRect(0, 0, 1, 1);
-    boundingBox.setPen(Qt::NoPen);
+    boundingBox.setPen(QColor(Qt::magenta));
     boundingBox.setBrush(Qt::NoBrush);
 }
 
