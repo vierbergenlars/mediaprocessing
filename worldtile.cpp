@@ -49,7 +49,7 @@ float WorldTile::getDifficulty() const
         return std::numeric_limits<float>::infinity();
     if(_enemy != nullptr && _enemy->getDefeated())
         return std::numeric_limits<float>::infinity();
-    return (1-_tile->getValue()) + getPoisonEffect();
+    return (1-_tile->getValue());
 }
 
 float WorldTile::getHealthpack() const
@@ -70,15 +70,6 @@ void WorldTile::depleteHealthpack()
     _healthpack = 0;
 }
 
-void WorldTile::addPoisonEffect(float poison)
-{
-    _poison+=poison;
-}
-
-float WorldTile::getPoisonEffect() const
-{
-    return _poison;
-}
 
 std::shared_ptr<Enemy> WorldTile::enemy() const
 {

@@ -18,18 +18,15 @@ public:
     float getHealthpack() const;
     float getHealthEffect() const;
     bool hasItem() const {
-        return _status != none || _enemy != nullptr || _healthpack != 0 || _poison != 0;
+        return _status != none || _enemy != nullptr || _healthpack != 0;
     }
     bool graphicsConstructed = false;
     std::shared_ptr<Enemy> enemy() const;
     void depleteHealthpack();
-    void addPoisonEffect(float poison);
-    float getPoisonEffect() const;
 private:
     std::shared_ptr<Tile> _tile;
     std::shared_ptr<Enemy> _enemy;
     float _healthpack = 0;
-    float _poison = 0;
     Status _status;
 };
 
