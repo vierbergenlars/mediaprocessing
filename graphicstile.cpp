@@ -43,6 +43,11 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
     itemText->setBrush(Qt::white);
     itemText->setPen(QPen(Qt::black, 0));
     itemText->setScale(0.1);
+
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
+
+    if(penemy != nullptr)
+        connect(&*penemy, &PEnemy::dead, this, &GraphicsPosition::update);
 }
 
 QRectF GraphicsPosition::boundingRect() const
