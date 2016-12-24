@@ -13,6 +13,9 @@ class MatrixView;
 template<class T>
 class MatrixIterator;
 
+template <class T>
+class Matrix;
+
 /**
  * @brief A simple fixed-size matrix which allows read/write access to objects inside it.
  *
@@ -93,7 +96,7 @@ public:
 
     virtual std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
     {
-        return std::unique_ptr<MatrixView<T>>(new MatrixView<T>(this, rowStart, colStart, rowEnd, colEnd));
+        return std::unique_ptr<MatrixView<T>>(new MatrixView<T>(*this, rowStart, colStart, rowEnd, colEnd));
     }
 
     /**
@@ -102,7 +105,7 @@ public:
      */
     virtual MatrixIterator<T> begin()
     {
-        return MatrixIterator<T>(this, 0, 0);
+        return MatrixIterator<T>(*this, 0, 0);
     }
 
     /**
@@ -111,7 +114,7 @@ public:
      */
     virtual MatrixIterator<T> end()
     {
-        return MatrixIterator<T>(this, this->rows(), 0);
+        return MatrixIterator<T>(*this, this->rows(), 0);
     }
 
     /**
@@ -129,6 +132,13 @@ public:
     {
         return _cols;
     }
+
+    bool operator!=(Matrix<T> & other) const
+    {
+        return this != &other;
+    }
+
+    virtual ~Matrix() = 0;
 
 protected:
     virtual T& _get(int row, int col) = 0;
@@ -153,6 +163,9 @@ private:
     int _rows;
     int _cols;
 };
+
+template<class T>
+Matrix<T>::~Matrix() {}
 
 
 /**
@@ -200,7 +213,7 @@ template<class T>
 class MatrixView: public Matrix<T>
 {
 public:
-    MatrixView(Matrix<T> *matrix, int rowStart, int colStart, int rowEnd, int colEnd):
+    MatrixView(Matrix<T> &matrix, int rowStart, int colStart, int rowEnd, int colEnd):
         Matrix<T>(rowEnd-rowStart+1, colEnd-colStart+1), matrix(matrix), _rowStart(rowStart), _colStart(colStart)
     {
 
@@ -208,34 +221,34 @@ public:
 
     virtual std::unique_ptr<MatrixView<T>> unsafeSlice(int rowStart, int colStart, int rowEnd, int colEnd)
     {
-        return matrix->unsafeSlice(_rowStart+rowStart, _colStart+colStart, _rowStart+rowEnd, _colStart+colEnd);
+        return matrix.unsafeSlice(_rowStart+rowStart, _colStart+colStart, _rowStart+rowEnd, _colStart+colEnd);
     }
 
     virtual bool contains(int row, int col) const override
     {
         if(!Matrix<T>::contains(row, col))
             return false;
-        return matrix->contains(_rowStart+row, _colStart+col);
+        return matrix.contains(_rowStart+row, _colStart+col);
     }
 
 protected:
     virtual T &_get(int row, int col) override
     {
-        return matrix->get(_rowStart+row, _colStart+col);
+        return matrix.get(_rowStart+row, _colStart+col);
     }
 
     virtual const T &_get(int row, int col) const override
     {
-        return matrix->get(_rowStart+row, _colStart+col);
+        return matrix.get(_rowStart+row, _colStart+col);
     }
 
     virtual void _set(int row, int col, const T& object) override
     {
-        matrix->set(_rowStart+row, _colStart+col, object);
+        matrix.set(_rowStart+row, _colStart+col, object);
     }
 
 private:
-    Matrix<T> *matrix;
+    Matrix<T> &matrix;
     int _rowStart;
     int _colStart;
 };
@@ -250,11 +263,11 @@ template<class T>
 class MatrixIterator
 {
 public:
-    MatrixIterator(Matrix<T> *matrix, int rowPos, int colPos):
+    MatrixIterator(Matrix<T> &matrix, int rowPos, int colPos):
         matrix(matrix), colPos(colPos), rowPos(rowPos)
     {
         // If the first given position is not in the matrix, and we are still in bounds go to the next position
-        if(!matrix->contains(rowPos, colPos) && rowPos < matrix->rows())
+        if(!matrix.contains(rowPos, colPos) && rowPos < matrix.rows())
             this->operator ++();
     }
 
@@ -267,7 +280,7 @@ public:
     {
         do {
             ++colPos;
-            if(colPos >= matrix->cols()) {
+            if(colPos >= matrix.cols()) {
                 colPos=0;
                 ++rowPos;
             }
@@ -277,22 +290,22 @@ public:
          * When we reach matrix->rows(), we are one position behind the iterator,
          * so it nicely matches the end() iterator.
          */
-        } while(!matrix->contains(rowPos, colPos) && rowPos < matrix->rows());
+        } while(!matrix.contains(rowPos, colPos) && rowPos < matrix.rows());
         return *this;
     }
 
     const T& operator*() const
     {
-        return matrix->get(rowPos, colPos);
+        return matrix.get(rowPos, colPos);
     }
 
     T& operator*()
     {
-        return matrix->get(rowPos, colPos);
+        return matrix.get(rowPos, colPos);
     }
 
 protected:
-    Matrix<T> *matrix;
+    Matrix<T> &matrix;
     int colPos;
     int rowPos;
 };
