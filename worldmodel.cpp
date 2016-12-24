@@ -36,6 +36,20 @@ bool WorldModel::moveProtagonist(int dx, int dy)
     if(newEnergy <= 0)
         return false;
 
+    _protagonist->setHealth(_protagonist->getHealth() + tile->getHealthEffect());
+    tile->depleteHealthpack();
+
+    std::shared_ptr<Enemy> enemy = tile->enemy();
+
+    if(enemy != nullptr && !enemy->getDefeated()) {
+        enemy->setDefeated(true);
+        _protagonist->setEnergy(100.0f);
+        std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
+        if(penemy != nullptr) {
+            penemy->poison();
+        }
+    }
+
     _protagonist->setEnergy(newEnergy);
     _protagonist->setPos(newX, newY);
     return true;
