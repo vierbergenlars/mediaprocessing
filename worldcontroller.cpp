@@ -5,6 +5,7 @@
 #include <chrono>
 #include <QDebug>
 #include <QImage>
+#include "worldtile.h"
 
 WorldController::WorldController(QGraphicsScene *scene)
     : range(20), scale(10), scene(scene)
@@ -16,7 +17,7 @@ void WorldController::createWorld(QString file)
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
-    tiles = new DenseMatrix<std::shared_ptr<WorldTile>>(world.getRows(), world.getCols());
+    auto tiles = new DenseMatrix<std::shared_ptr<WorldTile>>(world.getRows(), world.getCols());
 
     backgroundImage = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(file)));
     backgroundImage->setPos(0, 0);
@@ -50,7 +51,8 @@ void WorldController::createWorld(QString file)
         t->graphicsConstructed=true;
     }
 
-    protagonist = std::move(world.getProtagonist());
+    worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
+
     path = new PathFinder(5,5, 990, 937, tiles); //world map 990 937
     path->AStarInit();
 
@@ -59,22 +61,9 @@ void WorldController::createWorld(QString file)
     scene->addItem(gprotagonist);
 }
 
-
-std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> WorldController::getTilesAroundProtagonist()
-{
-    if(debugMode)
-        return tiles->unsafeSlice(0, 0, tiles->rows()-1, tiles->cols()-1);
-    int rowStart = protagonist->getYPos()-range;
-    int colStart = protagonist->getXPos()-range;
-    int rowEnd = protagonist->getYPos()+range;
-    int colEnd = protagonist->getXPos()+range;
-    return tiles->unsafeSlice(rowStart, colStart, rowEnd, colEnd);
-}
-
-
 void WorldController::render()
 {
-    for(std::shared_ptr<WorldTile> & t: *tiles) {
+    for(std::shared_ptr<WorldTile> & t: *worldModel->tiles()) {
         if(!t->hasItem() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
@@ -91,21 +80,13 @@ void WorldController::render()
     backgroundImage->setScale(scale);
 
 
-    gprotagonist->setPos(protagonist->getXPos()*scale, protagonist->getYPos()*scale);
+    gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
     gprotagonist->setScale(scale);
 }
 
 void WorldController::moveProtagonist(int x, int y)
 {
-    int newCol = protagonist->getXPos()+x;
-    int newRow = protagonist->getYPos()+y;
-    if(tiles->contains(newRow, newCol)) {
-       float newenergy = protagonist->getEnergy() - tiles->get(newRow, newCol)->getDifficulty();
-       if(newenergy>0){
-        protagonist->setEnergy(newenergy);
-        protagonist->setPos(newCol, newRow);
-       }
-    }
+    worldModel->moveProtagonist(x, y);
 }
 
 // random bullshit pls ignore
@@ -129,10 +110,10 @@ void WorldController::doPathfinder()
 }
 float WorldController::getProtagonistEnergy(){
 
-    return protagonist->getEnergy();
+    return worldModel->protagonist()->getEnergy();
 }
 float WorldController::getProtagonistHealth(){
-    return protagonist->getHealth();
+    return worldModel->protagonist()->getHealth();
 }
 
 

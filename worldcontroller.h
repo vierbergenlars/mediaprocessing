@@ -10,6 +10,7 @@
 #include <deque>
 #include "worldtile.h"
 #include "graphicstile.h"
+#include "worldmodel.h"
 class PathFinder;
 
 class WorldController
@@ -31,11 +32,9 @@ private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
     QGraphicsScene *scene;
-    Matrix<std::shared_ptr<WorldTile>> *tiles;
+    WorldModel *worldModel;
     std::vector<GraphicsPosition*> positions;
     GraphicsProtagonist* gprotagonist;
-    std::shared_ptr<Protagonist> protagonist;
-    std::unique_ptr<Matrix<std::shared_ptr<WorldTile>>> getTilesAroundProtagonist();
 };
 
 #endif // WORLDCONTROLLER_H
