@@ -92,3 +92,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
     controller->render();
 }
+
+MainWindow::~MainWindow()
+{
+    delete controller;
+}

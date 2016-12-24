@@ -17,6 +17,7 @@ class WorldController
 {
 public:
     WorldController(QGraphicsScene*scene);
+    ~WorldController();
     void createWorld(QString world);
     void render();
     void moveProtagonist(int rows, int cols);

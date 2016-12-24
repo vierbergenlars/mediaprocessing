@@ -12,6 +12,12 @@ WorldController::WorldController(QGraphicsScene *scene)
 {
 }
 
+WorldController::~WorldController()
+{
+    delete worldModel;
+    delete path;
+}
+
 void WorldController::createWorld(QString file)
 {
     World world;

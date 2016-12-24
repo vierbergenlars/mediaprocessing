@@ -15,6 +15,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void createWorld(QString file);
     virtual void keyPressEvent(QKeyEvent* event) override;
+    virtual ~MainWindow();
 private:
     WorldController *controller;
     QGraphicsView mainView;
