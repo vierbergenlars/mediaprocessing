@@ -49,7 +49,7 @@ void WorldController::createWorld(QString file)
     }
 
     for(std::shared_ptr<WorldTile> & t: *tiles) {
-        if(!t->hasItem() || t->graphicsConstructed)
+        if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
@@ -70,7 +70,7 @@ void WorldController::createWorld(QString file)
 void WorldController::render()
 {
     for(std::shared_ptr<WorldTile> & t: *worldModel->tiles()) {
-        if(!t->hasItem() || t->graphicsConstructed)
+        if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
