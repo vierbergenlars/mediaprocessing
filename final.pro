@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     pathfinder.cpp \
     worldtile.cpp \
     worldmodel.cpp \
-    strategy.cpp
+    strategy.cpp \
+    mypenemy.cpp
 
 unix:!macx: LIBS += -L$$PWD/libworld.so/ -lworld
 
@@ -36,4 +37,5 @@ HEADERS += \
     pathfinder.h \
     worldtile.h \
     worldmodel.h \
-    strategy.h
+    strategy.h \
+    mypenemy.h

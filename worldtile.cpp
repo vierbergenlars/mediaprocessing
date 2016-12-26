@@ -1,4 +1,5 @@
 #include "worldtile.h"
+#include "mypenemy.h"
 #include <cassert>
 #include <limits>
 #include <cmath>
@@ -13,7 +14,12 @@ void WorldTile::setEnemy(std::shared_ptr<Enemy> enemy)
 {
     assert(_enemy == nullptr);
     assert(enemy->getXPos() == getX() && enemy->getYPos() == getY());
-    _enemy = enemy;
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
+    if(penemy != nullptr) {
+        _enemy = std::make_shared<MyPEnemy>(penemy);
+    } else {
+        _enemy = enemy;
+    }
 }
 
 void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
@@ -26,6 +32,7 @@ void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
 void WorldTile::setStatus(WorldTile::Status status)
 {
     _status = status;
+    emit changed();
 }
 
 WorldTile::Status WorldTile::status() const
@@ -60,19 +67,24 @@ float WorldTile::getHealthpack() const
 float WorldTile::getHealthEffect() const
 {
     float healthEffect = getHealthpack();
-    if(_enemy != nullptr && std::dynamic_pointer_cast<PEnemy>(_enemy) == nullptr)
+    if(_enemy != nullptr && std::dynamic_pointer_cast<MyPEnemy>(_enemy) == nullptr)
         healthEffect-=_enemy->getValue();
     return healthEffect;
 }
 
 void WorldTile::depleteHealthpack()
 {
+    if(_healthpack != 0) {
+        _healthpack = 0;
+        emit changed();
+    }
     _healthpack = 0;
 }
 
 void WorldTile::addPoisonEffect(float poison)
 {
     _poison+=poison;
+    emit changed();
 }
 
 float WorldTile::getPoisonEffect() const

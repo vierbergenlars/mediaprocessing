@@ -18,13 +18,13 @@ PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::s
 
 bool PathFinder::RunAStarStep()
 {
-    if(solutionFound)return true;
+    if(solutionFound||openList.empty())return true;
     Node currentNode;
     //3.1 +3.2
 
     do {
         currentNode = openList.top(); //get the best node form open List
-        if(openList.size() > 1)
+        if(!openList.empty())
             openList.pop();//delete currentNode from open
         else{
             return true;}
@@ -103,7 +103,7 @@ std::deque<Node> PathFinder::AStarSolution()
 {
     Node currentNode = solutionNode;
     // sollution should be found now
-    if (currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // oplossing gevonden
+    if (solutionFound && currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // oplossing gevonden
         while(currentNode.parent != nullptr){
             resultList.push_front(currentNode);
             currentNode.tile->setStatus(WorldTile::Status::solution);
