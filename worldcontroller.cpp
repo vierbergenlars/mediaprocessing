@@ -54,6 +54,7 @@ void WorldController::createWorld(QString file)
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
         scene->addItem(graphicsPos);
+        graphicsPos->update();
         t->graphicsConstructed=true;
     }
 
@@ -75,13 +76,13 @@ void WorldController::render()
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
         scene->addItem(graphicsPos);
+        graphicsPos->update();
         t->graphicsConstructed=true;
     }
 
     for(GraphicsPosition *&graphicsPos: positions) {
         graphicsPos->updateScale(scale);
         graphicsPos->setZValue(2);
-        graphicsPos->update();
     }
     backgroundImage->setScale(scale);
 
