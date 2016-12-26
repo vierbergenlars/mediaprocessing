@@ -32,6 +32,7 @@ void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
 void WorldTile::setStatus(WorldTile::Status status)
 {
     _status = status;
+    emit changed();
 }
 
 WorldTile::Status WorldTile::status() const
@@ -73,12 +74,17 @@ float WorldTile::getHealthEffect() const
 
 void WorldTile::depleteHealthpack()
 {
+    if(_healthpack != 0) {
+        _healthpack = 0;
+        emit changed();
+    }
     _healthpack = 0;
 }
 
 void WorldTile::addPoisonEffect(float poison)
 {
     _poison+=poison;
+    emit changed();
 }
 
 float WorldTile::getPoisonEffect() const

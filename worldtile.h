@@ -2,9 +2,11 @@
 #define WORLDTILE_H
 
 #include <world.h>
+#include <QObject>
 
-class WorldTile
+class WorldTile: public QObject
 {
+    Q_OBJECT
 public:
     enum Status {none, openlist, closedlist, solution};
     WorldTile(std::shared_ptr<Tile> tile = nullptr);
@@ -28,6 +30,8 @@ public:
     void depleteHealthpack();
     void addPoisonEffect(float poison);
     float getPoisonEffect() const;
+signals:
+    void changed();
 private:
     std::shared_ptr<Tile> _tile;
     std::shared_ptr<Enemy> _enemy;

@@ -28,22 +28,27 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
 {
     statusRect = new QGraphicsRectItem(this);
     statusRect->setRect(0,0,1,1);
-    statusRect->setZValue(4);
+    statusRect->setZValue(3);
     statusRect->setPen(Qt::NoPen);
 
     poisonRect = new QGraphicsRectItem(this);
     poisonRect->setRect(0,0,1,1);
     poisonRect->setPen(Qt::NoPen);
+    poisonRect->setZValue(2);
 
 
     itemEllipse = new QGraphicsEllipseItem(this);
     itemEllipse->setRect(0, 0, 1, 1);
     itemEllipse->setPen(Qt::NoPen);
+    itemEllipse->setZValue(4);
 
     itemText = new QGraphicsSimpleTextItem(this);
     itemText->setBrush(Qt::white);
     itemText->setPen(QPen(Qt::black, 0));
     itemText->setScale(0.1);
+    itemText->setZValue(5);
+
+    connect(&*tile, &WorldTile::changed, this, &GraphicsPosition::update);
 
     std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
 

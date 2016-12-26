@@ -1,6 +1,7 @@
 #include "worldmodel.h"
 #include <cmath>
 #include "mypenemy.h"
+#include <QObject>
 
 WorldModel::WorldModel(Matrix<std::shared_ptr<WorldTile> > *tiles, std::shared_ptr<Protagonist> protagonist)
     :_tiles(tiles), _protagonist(protagonist)
@@ -66,14 +67,17 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
 {
     std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
-    int radius = std::floor(penemy->getPoisonLevel()/10.0f);
+    float radius = penemy->getPoisonLevel()/10.0f;
     auto tiles = tilesAround(penemy, radius);
 
     for(std::shared_ptr<WorldTile> wt: *tiles) {
-        float distance = std::sqrt(std::pow(tile->getX() - wt->getX(), 2) + std::pow(tile->getY() - wt->getY(), 2));
+        float distance = std::hypot(tile->getX() - wt->getX(), tile->getY() - wt->getY());
         if(distance > radius)
             continue;
-        wt->addPoisonEffect(penemy->getPoisonLevel()/distance);
+        QObject::connect(&*penemy, &MyPEnemy::poisoned, [wt, distance](float poison) {
+            if(distance < poison/10.f)
+                wt->addPoisonEffect(10.f);
+        });
     }
 }
 
