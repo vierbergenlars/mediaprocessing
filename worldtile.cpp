@@ -49,7 +49,7 @@ float WorldTile::getDifficulty() const
         return std::numeric_limits<float>::infinity();
     if(_enemy != nullptr && _enemy->getDefeated())
         return std::numeric_limits<float>::infinity();
-    return (1-_tile->getValue()) + getPoisonEffect();
+    return (1-_tile->getValue()) + getPoisonEffect() / 10.f;
 }
 
 float WorldTile::getHealthpack() const

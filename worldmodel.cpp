@@ -53,12 +53,27 @@ bool WorldModel::moveProtagonist(int dx, int dy)
         _protagonist->setEnergy(100.0f);
         std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
         if(penemy != nullptr) {
+            doPoison(tile);
             penemy->poison();
         }
     }
 
     _protagonist->setPos(newX, newY);
     return true;
+}
+
+void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
+{
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
+    int radius = std::floor(penemy->getPoisonLevel()/10.0f);
+    auto tiles = tilesAround(penemy, radius);
+
+    for(std::shared_ptr<WorldTile> wt: *tiles) {
+        float distance = std::sqrt(std::pow(tile->getX() - wt->getX(), 2) + std::pow(tile->getY() - wt->getY(), 2));
+        if(distance > radius)
+            continue;
+        wt->addPoisonEffect(penemy->getPoisonLevel()/distance);
+    }
 }
 
 WorldModel::~WorldModel()
