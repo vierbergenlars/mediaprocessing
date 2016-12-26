@@ -59,8 +59,16 @@ void WorldController::createWorld(QString file)
 
     worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
 
-    path = new PathFinder(5,5, 990, 937, tiles); //world map 990 937
+    path = new PathFinder(5,5, 450, 450, tiles); //world map 990 937
     path->AStarInit();
+
+    path->RunAStar();
+    delete path;
+    path = new PathFinder(450,450,990,937, tiles);
+    path->AStarInit();
+
+
+
 
     gprotagonist = new GraphicsProtagonist();
     gprotagonist->setZValue(3);

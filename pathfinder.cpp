@@ -3,8 +3,15 @@
 #include <set>
 #include <cmath>
 PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix):
-    _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix)
+    _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix) ,statusMatrix(matrix->rows(), matrix->cols())
 {
+    for(int i =0; i<statusMatrix.rows();i++){
+        for(int j = 0; j<statusMatrix.cols();j++){
+            statusMatrix.set(i,j,Status::none);
+        }
+    }
+
+    AStarInit();
 
 }
 
@@ -17,17 +24,17 @@ bool PathFinder::RunAStarStep()
 
     do {
         currentNode = openList.top(); //get the best node form open List
-        if(openList.size() > 1) openList.pop();//delete currentNode from open
+        if(openList.size() > 1)
+            openList.pop();//delete currentNode from open
         else{
             return true;}
 
-        openList.pop();//delete currentNode from open
-
-    } while(currentNode.tile->status() == WorldTile::Status::closedlist);
+    } while(statusMatrix.get(currentNode.tile->getY(), currentNode.tile->getX()) == Status::closedlist);
 
 
-    closedList.push_back(currentNode); //add current node to closed
+    //add current node to closed
     currentNode.tile->setStatus(WorldTile::Status::closedlist);
+    statusMatrix.set(currentNode.tile->getY(),currentNode.tile->getX(),Status::closedlist);
 
     if (currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // the current node is the solution node
         solutionNode = currentNode;
@@ -57,7 +64,7 @@ bool PathFinder::RunAStarStep()
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
                     nearbyNode.givenCost = currentNode.givenCost + nearbyNode.tile->getDifficulty();
                     nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10;
-                    if( nearbyNode.tile->status()!= WorldTile::Status::closedlist){ //  if not already in Lists
+                    if( statusMatrix.get(nearbyNode.tile->getY(),nearbyNode.tile->getX())!= Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
                         nearbyNode.tile->setStatus(WorldTile::Status::openlist);
                     }
@@ -80,6 +87,9 @@ bool PathFinder::RunAStarStep()
 
 void PathFinder::AStarInit()
 {
+
+
+
     //step 1 Breadth-First
     Node startNode;
     startNode.parent = nullptr;
@@ -90,6 +100,9 @@ void PathFinder::AStarInit()
     //step 2
     openList.push(startNode);
     startNode.tile->setStatus(WorldTile::Status::openlist);
+
+
+
 }
 
 std::deque<Node> PathFinder::AStarSolution()

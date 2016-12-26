@@ -35,8 +35,13 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 
     if(newEnergy <= 0)
         return false;
+    float newHealth= _protagonist->getHealth() + tile->getHealthEffect();
+    if(newHealth<=0)
+        newHealth = 0;
+    if(newHealth >=100)
+        newHealth=100;
 
-    _protagonist->setHealth(_protagonist->getHealth() + tile->getHealthEffect());
+    _protagonist->setHealth(newHealth);
     tile->depleteHealthpack();
 
     std::shared_ptr<Enemy> enemy = tile->enemy();

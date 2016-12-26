@@ -29,6 +29,7 @@ struct CompareNode{ // compare function used for priority queue
 class PathFinder
 {
 public:
+
     PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
@@ -36,6 +37,7 @@ public:
     bool RunAStarStep();
     std::deque<Node> AStarSolution();
 private:
+    enum Status {none, openlist, closedlist, solution};
     Node currentBestNode;
     Node solutionNode;
     bool solutionFound = false;
@@ -49,6 +51,7 @@ private:
     int _ystart;
     int _xend;
     int _yend;
+    DenseMatrix<PathFinder::Status> statusMatrix;
 };
 
 
