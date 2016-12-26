@@ -60,7 +60,7 @@ float WorldTile::getHealthpack() const
 float WorldTile::getHealthEffect() const
 {
     float healthEffect = getHealthpack();
-    if(_enemy != nullptr)
+    if(_enemy != nullptr && std::dynamic_pointer_cast<PEnemy>(_enemy) == nullptr)
         healthEffect-=_enemy->getValue();
     return healthEffect;
 }
