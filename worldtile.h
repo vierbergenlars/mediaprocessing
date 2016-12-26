@@ -30,6 +30,7 @@ public:
     void depleteHealthpack();
     void addPoisonEffect(float poison);
     float getPoisonEffect() const;
+    bool killEnemy();
 signals:
     void changed();
 private:

@@ -55,8 +55,7 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 
     std::shared_ptr<Enemy> enemy = tile->enemy();
 
-    if(enemy != nullptr && !enemy->getDefeated()) {
-        enemy->setDefeated(true);
+    if(tile->killEnemy()) {
         _protagonist->setEnergy(100.0f);
         std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(enemy);
         if(penemy != nullptr) {

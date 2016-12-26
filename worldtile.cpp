@@ -81,6 +81,15 @@ void WorldTile::depleteHealthpack()
     _healthpack = 0;
 }
 
+bool WorldTile::killEnemy()
+{
+    if(_enemy == nullptr || _enemy->getDefeated())
+        return false;
+    _enemy->setDefeated(true);
+    emit changed();
+    return true;
+}
+
 void WorldTile::addPoisonEffect(float poison)
 {
     _poison+=poison;
