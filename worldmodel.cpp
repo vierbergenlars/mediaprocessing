@@ -1,5 +1,6 @@
 #include "worldmodel.h"
 #include <cmath>
+#include "mypenemy.h"
 
 WorldModel::WorldModel(Matrix<std::shared_ptr<WorldTile> > *tiles, std::shared_ptr<Protagonist> protagonist)
     :_tiles(tiles), _protagonist(protagonist)
@@ -51,7 +52,7 @@ bool WorldModel::moveProtagonist(int dx, int dy)
     if(enemy != nullptr && !enemy->getDefeated()) {
         enemy->setDefeated(true);
         _protagonist->setEnergy(100.0f);
-        std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
+        std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(enemy);
         if(penemy != nullptr) {
             doPoison(tile);
             penemy->poison();
@@ -64,7 +65,7 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 
 void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
 {
-    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
+    std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
     int radius = std::floor(penemy->getPoisonLevel()/10.0f);
     auto tiles = tilesAround(penemy, radius);
 

@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include "mypenemy.h"
 
 GraphicsProtagonist::GraphicsProtagonist(QGraphicsItem *parent):
     QGraphicsItem(parent), boundingBox(this)
@@ -44,10 +45,12 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
     itemText->setPen(QPen(Qt::black, 0));
     itemText->setScale(0.1);
 
-    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
+    std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
 
-    if(penemy != nullptr)
+    if(penemy != nullptr) {
         connect(&*penemy, &PEnemy::dead, this, &GraphicsPosition::update);
+        connect(&*penemy, SIGNAL(poisoned(float)), this, SLOT(update()));
+    }
 }
 
 QRectF GraphicsPosition::boundingRect() const
