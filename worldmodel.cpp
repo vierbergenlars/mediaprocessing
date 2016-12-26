@@ -89,13 +89,10 @@ WorldModel::~WorldModel()
 std::vector<std::shared_ptr<WorldTile> > WorldModel::getEnemyTiles()
 {
     std::vector<std::shared_ptr<WorldTile> > enemyTiles;
-    for(int i=0; i<tiles()->rows(); i++){
-        for(int j=0; j<tiles()->cols();j++){
-            auto tile = tiles()->get(i,j);
+    for(auto tile : *_tiles){
 
-            if(tile->enemy() != nullptr) // is an enemy
-                enemyTiles.push_back(tile);
-        }
+        if(tile->enemy() != nullptr) // is an enemy
+            enemyTiles.push_back(tile);
     }
     return enemyTiles;
 }
@@ -103,12 +100,11 @@ std::vector<std::shared_ptr<WorldTile> > WorldModel::getEnemyTiles()
 std::vector<std::shared_ptr<WorldTile> > WorldModel::getHealtPackTiles()
 {
     std::vector<std::shared_ptr<WorldTile> > healtTiles;
-    for(int i=0; i<tiles()->rows(); i++){
-        for(int j=0; j<tiles()->cols();j++){
-            auto tile = tiles()->get(i,j);
-            if(tile->hasItem()) // is a healthpack
+    for(auto tile : *_tiles){
+
+            if(tile->getHealthpack()>0) // is a healthpack
                 healtTiles.push_back(tile);
         }
-    }
+
     return healtTiles;
 }

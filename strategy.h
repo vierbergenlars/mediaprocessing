@@ -11,12 +11,10 @@
 class Strategy
 {
 public:
-    Strategy(std::shared_ptr<WorldModel> worldModel);
-    enum Direction{
-        up, down, left, right
-    };
+    Strategy(WorldModel *worldModel);
 
-    Direction getNextStep();
+
+    void getNextStep();
 
 private:
     std::shared_ptr<WorldModel> _worldModel;

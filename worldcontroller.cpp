@@ -16,6 +16,8 @@ WorldController::~WorldController()
 {
     delete worldModel;
     delete path;
+    delete strategy;
+
 }
 
 void WorldController::createWorld(QString file)
@@ -34,14 +36,14 @@ void WorldController::createWorld(QString file)
         tiles->set(wt->getY(), wt->getX(), wt);
     }
 
-    auto enemiesList = world.getEnemies(8);
+    auto enemiesList = world.getEnemies(2);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
         tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
-    auto healthpacksList = world.getHealthPacks(8);
+    auto healthpacksList = world.getHealthPacks(2);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();
@@ -70,7 +72,7 @@ void WorldController::createWorld(QString file)
     gprotagonist->setZValue(3);
     scene->addItem(gprotagonist);
 
-
+    strategy = new Strategy(worldModel);
 }
 
 void WorldController::render()
@@ -101,14 +103,16 @@ void WorldController::moveProtagonist(int x, int y)
     worldModel->moveProtagonist(x, y);
 }
 
-// random bullshit pls ignore
+
 bool WorldController::doPathfinderStep()
 {
-    if(path->RunAStarStep()) {
-        path->AStarSolution();
-        return true;
-    }
-    return false;
+
+    strategy->getNextStep();
+//    if(path->RunAStarStep()) {
+//        path->AStarSolution();
+//        return true;
+//    }
+   return false;
 }
 void WorldController::doPathfinder()
 {

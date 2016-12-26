@@ -11,6 +11,7 @@
 #include "worldtile.h"
 #include "graphicstile.h"
 #include "worldmodel.h"
+#include "strategy.h"
 class PathFinder;
 
 class WorldController
@@ -36,6 +37,7 @@ private:
     WorldModel *worldModel;
     std::vector<GraphicsPosition*> positions;
     GraphicsProtagonist* gprotagonist;
+    Strategy *strategy;
 };
 
 #endif // WORLDCONTROLLER_H
