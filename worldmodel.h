@@ -16,6 +16,7 @@ public:
 private:
     Matrix<std::shared_ptr<WorldTile>> *_tiles;
     std::shared_ptr<Protagonist> _protagonist;
+    std::unique_ptr<Matrix<std::shared_ptr<WorldTile> > > tilesAround(std::shared_ptr<Tile> tile, int range);
 };
 
 #endif // WORLDMODEL_H

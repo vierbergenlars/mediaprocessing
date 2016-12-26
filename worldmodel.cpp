@@ -41,6 +41,8 @@ bool WorldModel::moveProtagonist(int dx, int dy)
     if(newEnergy <= 0)
         return false;
 
+    _protagonist->setEnergy(newEnergy);
+
     _protagonist->setHealth(_protagonist->getHealth() + tile->getHealthEffect());
     tile->depleteHealthpack();
 
@@ -55,7 +57,6 @@ bool WorldModel::moveProtagonist(int dx, int dy)
         }
     }
 
-    _protagonist->setEnergy(newEnergy);
     _protagonist->setPos(newX, newY);
     return true;
 }
