@@ -17,12 +17,10 @@ bool PathFinder::RunAStarStep()
 
     do {
         currentNode = openList.top(); //get the best node form open List
-        if(openList.size() > 1) openList.pop();//delete currentNode from open
-        else{
-            return true;}
-
-        openList.pop();//delete currentNode from open
-
+        if(openList.size() > 1)
+            openList.pop();//delete currentNode from open
+        else
+            return true;
     } while(currentNode.tile->status() == WorldTile::Status::closedlist);
 
 
