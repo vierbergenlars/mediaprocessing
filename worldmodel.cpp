@@ -9,11 +9,16 @@ WorldModel::WorldModel(Matrix<std::shared_ptr<WorldTile> > *tiles, std::shared_p
 
 std::unique_ptr<Matrix<std::shared_ptr<WorldTile> > > WorldModel::tilesAroundProtagonist(int range)
 {
-    int rowStart = std::max(0, _protagonist->getYPos() - range);
-    int colStart = std::max(0, _protagonist->getXPos() - range);
+    return tilesAround(_protagonist, range);
+}
 
-    int rowEnd = std::min(_tiles->rows()-1, _protagonist->getYPos() + range);
-    int colEnd = std::max(_tiles->cols()-1, _protagonist->getXPos() + range);
+std::unique_ptr<Matrix<std::shared_ptr<WorldTile> > > WorldModel::tilesAround(std::shared_ptr<Tile> tile, int range)
+{
+    int rowStart = std::max(0, tile->getYPos() - range);
+    int colStart = std::max(0, tile->getXPos() - range);
+
+    int rowEnd = std::min(_tiles->rows()-1, tile->getYPos() + range);
+    int colEnd = std::min(_tiles->cols()-1, tile->getXPos() + range);
 
     return _tiles->slice(rowStart, colStart, rowEnd, colEnd);
 }
@@ -41,6 +46,8 @@ bool WorldModel::moveProtagonist(int dx, int dy)
     if(newHealth >=100)
         newHealth=100;
 
+    _protagonist->setEnergy(newEnergy);
+
     _protagonist->setHealth(newHealth);
     tile->depleteHealthpack();
 
@@ -51,16 +58,57 @@ bool WorldModel::moveProtagonist(int dx, int dy)
         _protagonist->setEnergy(100.0f);
         std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
         if(penemy != nullptr) {
+            doPoison(tile);
             penemy->poison();
         }
     }
 
-    _protagonist->setEnergy(newEnergy);
     _protagonist->setPos(newX, newY);
     return true;
+}
+
+void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
+{
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
+    int radius = std::floor(penemy->getPoisonLevel()/10.0f);
+    auto tiles = tilesAround(penemy, radius);
+
+    for(std::shared_ptr<WorldTile> wt: *tiles) {
+        float distance = std::sqrt(std::pow(tile->getX() - wt->getX(), 2) + std::pow(tile->getY() - wt->getY(), 2));
+        if(distance > radius)
+            continue;
+        wt->addPoisonEffect(penemy->getPoisonLevel()/distance);
+    }
 }
 
 WorldModel::~WorldModel()
 {
     delete _tiles;
+}
+
+std::vector<std::shared_ptr<WorldTile> > WorldModel::getEnemyTiles()
+{
+    std::vector<std::shared_ptr<WorldTile> > enemyTiles;
+    for(int i=0; i<tiles()->rows(); i++){
+        for(int j=0; j<tiles()->cols();j++){
+            auto tile = tiles()->get(i,j);
+
+            if(tile->enemy() != nullptr) // is an enemy
+                enemyTiles.push_back(tile);
+        }
+    }
+    return enemyTiles;
+}
+
+std::vector<std::shared_ptr<WorldTile> > WorldModel::getHealtPackTiles()
+{
+    std::vector<std::shared_ptr<WorldTile> > healtTiles;
+    for(int i=0; i<tiles()->rows(); i++){
+        for(int j=0; j<tiles()->cols();j++){
+            auto tile = tiles()->get(i,j);
+            if(tile->hasItem()) // is a healthpack
+                healtTiles.push_back(tile);
+        }
+    }
+    return healtTiles;
 }

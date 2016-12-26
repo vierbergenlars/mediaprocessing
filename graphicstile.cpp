@@ -80,13 +80,13 @@ void GraphicsPosition::update()
         statusRect->setBrush(QBrush(Qt::transparent));
     }
 
+    std::shared_ptr<const Enemy> enemy = tile->enemy();
 
     float healthEffect = tile->getHealthEffect();
     if(healthEffect > 0) {
         itemEllipse->setBrush(QBrush(Qt::green));
-        itemText->setText(QString::number(healthEffect));
-    } else if(healthEffect < 0) {
-        std::shared_ptr<const Enemy> enemy = tile->enemy();
+        itemText->setText(QString::number(tile->getHealthpack()));
+    } else if(enemy != nullptr) {
         std::shared_ptr<const PEnemy> penemy = std::dynamic_pointer_cast<const PEnemy>(enemy);
         if(penemy != nullptr) {
             itemEllipse->setBrush(QBrush(QColor(0xff, 0, 0xff)));

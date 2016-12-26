@@ -87,9 +87,6 @@ bool PathFinder::RunAStarStep()
 
 void PathFinder::AStarInit()
 {
-
-
-
     //step 1 Breadth-First
     Node startNode;
     startNode.parent = nullptr;
@@ -100,9 +97,6 @@ void PathFinder::AStarInit()
     //step 2
     openList.push(startNode);
     startNode.tile->setStatus(WorldTile::Status::openlist);
-
-
-
 }
 
 std::deque<Node> PathFinder::AStarSolution()

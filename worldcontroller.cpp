@@ -49,7 +49,7 @@ void WorldController::createWorld(QString file)
     }
 
     for(std::shared_ptr<WorldTile> & t: *tiles) {
-        if(!t->hasItem() || t->graphicsConstructed)
+        if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
@@ -62,10 +62,6 @@ void WorldController::createWorld(QString file)
     path = new PathFinder(5,5, 450, 450, tiles); //world map 990 937
     path->AStarInit();
 
-    path->RunAStar();
-    delete path;
-    path = new PathFinder(450,450,990,937, tiles);
-    path->AStarInit();
 
 
 
@@ -73,12 +69,14 @@ void WorldController::createWorld(QString file)
     gprotagonist = new GraphicsProtagonist();
     gprotagonist->setZValue(3);
     scene->addItem(gprotagonist);
+
+
 }
 
 void WorldController::render()
 {
     for(std::shared_ptr<WorldTile> & t: *worldModel->tiles()) {
-        if(!t->hasItem() || t->graphicsConstructed)
+        if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);

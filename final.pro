@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     pathfinder.cpp \
     worldtile.cpp \
-    worldmodel.cpp
+    worldmodel.cpp \
+    strategy.cpp
 
 unix:!macx: LIBS += -L$$PWD/libworld.so/ -lworld
 
@@ -34,4 +35,5 @@ HEADERS += \
     mainwindow.h \
     pathfinder.h \
     worldtile.h \
-    worldmodel.h
+    worldmodel.h \
+    strategy.h

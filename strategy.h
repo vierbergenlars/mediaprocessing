@@ -1,0 +1,33 @@
+#ifndef STRATEGY_H
+#define STRATEGY_H
+
+#include <matrix.h>
+#include<pathfinder.h>
+#include<worldmodel.h>
+#include<vector>
+#include<pathfinder.h>
+
+
+class Strategy
+{
+public:
+    Strategy(std::shared_ptr<WorldModel> worldModel);
+    enum Direction{
+        up, down, left, right
+    };
+
+    Direction getNextStep();
+
+private:
+    std::shared_ptr<WorldModel> _worldModel;
+    std::vector<std::shared_ptr<Enemy>> enemys;
+    std::vector<std::shared_ptr<WorldTile>> healtTiles;
+    std::deque<Node> stepQue;
+
+
+    std::vector<std::shared_ptr<WorldTile> > findDefeatableEnemies();
+    std::deque<Node> findClosestEnemyPath();
+    std::deque<Node> findClosestHealtpackPath();
+};
+
+#endif // STRATEGY_H
