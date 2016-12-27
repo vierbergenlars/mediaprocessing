@@ -1,6 +1,5 @@
 #include "worldmodel.h"
 #include <cmath>
-#include "mypenemy.h"
 #include <QObject>
 
 WorldModel::WorldModel(Matrix<std::shared_ptr<WorldTile> > *tiles, std::shared_ptr<Protagonist> protagonist)

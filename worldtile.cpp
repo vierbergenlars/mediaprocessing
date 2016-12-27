@@ -1,5 +1,4 @@
 #include "worldtile.h"
-#include "mypenemy.h"
 #include <cassert>
 #include <limits>
 #include <cmath>
