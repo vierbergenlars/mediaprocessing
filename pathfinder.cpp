@@ -64,7 +64,7 @@ bool PathFinder::RunAStarStep()
 
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
                     nearbyNode.givenCost = currentNode.givenCost + nearbyNode.tile->getDifficulty();
-                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y,nearbyNode.tile->hasItem())/10 ;
+                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10 ;
                     if( statusMatrix.get(nearbyNode.tile->getY(),nearbyNode.tile->getX())!= WorldTile::Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
                         statusMatrix.set(nearbyNode.tile->getY(),nearbyNode.tile->getX(),WorldTile::Status::openlist);
@@ -133,12 +133,9 @@ std::deque<Node> PathFinder::RunAStar()
 
 }
 
-float PathFinder::calcHeuristicScore(int x, int y,bool avoid) // distance to end point
+float PathFinder::calcHeuristicScore(int x, int y) // distance to end point
 {
-    int i =0;
-    if(avoid)
-        i = 100;
-    return ((abs(x-_xend)+abs(y-_yend)) +i) ;
+    return (abs(x-_xend)+abs(y-_yend));
 }
 
 void PathFinder::showVisuals(){

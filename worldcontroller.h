@@ -29,6 +29,7 @@ public:
     bool doPathfinderStep();
     void doPathfinder();
 
+    WorldModel* getWorldModel();
     float getProtagonistEnergy();
     float getProtagonistHealth();
     void playStrategy();

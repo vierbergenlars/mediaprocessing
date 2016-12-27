@@ -59,6 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::createWorld(QString file)
 {
     controller->createWorld(file);
+    QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
+        this->healthBar->setValue(this->controller->getWorldModel()->protagonist()->getHealth());
+        this->energyBar->setValue(this->controller->getWorldModel()->protagonist()->getEnergy());
+    });
     controller->render();
 }
 

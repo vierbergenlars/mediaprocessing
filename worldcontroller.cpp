@@ -175,6 +175,11 @@ void WorldController::doPathfinder()
         qDebug() << duration << "µs";
 
 }
+
+WorldModel* WorldController::getWorldModel()
+{
+ return worldModel;
+}
 float WorldController::getProtagonistEnergy(){
 
     return worldModel->protagonist()->getEnergy();

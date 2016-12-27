@@ -43,7 +43,7 @@ private:
     Node solutionNode;
     bool solutionFound = false;
     int makeHash(int x, int y){return x<<16 |y;};
-    float calcHeuristicScore(int x, int y, bool avoid);
+    float calcHeuristicScore(int x, int y);
     Matrix<std::shared_ptr<WorldTile>>* _matrix;
     std::priority_queue<Node,std::deque<Node>, CompareNode> openList;
     std::deque<Node> closedList;
