@@ -57,8 +57,9 @@ Strategy::StepType Strategy::doNextStep()
         for(std::shared_ptr<WorldTile> tile :tileList){
 
             auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
-            path->AStarInit();
             tempQue = path->RunAStar();
+            if(tempQue.empty())
+                return tempQue;
             float cost = tempQue.back().finalCost;
 
             if(minDistance >cost) {
