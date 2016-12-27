@@ -11,13 +11,14 @@ Strategy::Strategy(WorldModel* worldModel)
 bool Strategy::doNextStep()
 {
     if(stepQue.empty()){ //que empty = zoek nieuwe destinatie
-
-     std::deque<Node> tempQue =findClosestEnemyPath();
+     std::vector<std::shared_ptr<WorldTile> > enemies = findDefeatableEnemies();
+     std::deque<Node> tempQue =findClosestPath(enemies);
      if(!tempQue.empty()){
          stepQue = tempQue;
      }
      else{ // als geen enemies, spel gewonnen, niet genoeg health om enemies te verslaan?, of geen energy?
-        stepQue =findClosestHealtpackPath();
+         std::vector<std::shared_ptr<WorldTile> > healtTiles = _worldModel->getHealtPackTiles();
+         stepQue =findClosestPath(healtTiles);
      }
 
      if(stepQue.empty()){
@@ -40,43 +41,11 @@ bool Strategy::doNextStep()
 
 
 }
-    std::deque<Node> Strategy::findClosestHealtpackPath(){
+
+
+    std::deque<Node> Strategy::findClosestPath(std::vector<std::shared_ptr<WorldTile> > tileList){
         std::shared_ptr<PathFinder> bestPath;
-        std::vector<std::shared_ptr<WorldTile> > healtTiles = _worldModel->getHealtPackTiles();
-        int x = _worldModel->protagonist()->getXPos();
-        int y= _worldModel->protagonist()->getYPos();
-        float minDistance= std::numeric_limits<float>::infinity();
-        std::deque<Node> tempQue;
-        std::deque<Node> resultQue;
-        if(healtTiles.empty()){
-            tempQue.clear();
-            return tempQue; // geen healthpacks meer over?
-        }
-        for(std::shared_ptr<WorldTile> tile :healtTiles){
-            auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
-            path->AStarInit();
-            tempQue = path->RunAStar();
-            float cost = tempQue.back().finalCost;
 
-            if(minDistance >cost){ //nieuw minimum
-                minDistance = cost;
-                resultQue = tempQue;
-                bestPath = path;
-            }
-        }
-        if(minDistance > _worldModel->protagonist()->getEnergy()){
-            // geen packs te bereiken
-            tempQue.clear();
-            return tempQue;
-        }
-        bestPath->showVisuals();
-        return resultQue;
-
-}
-
-    std::deque<Node> Strategy::findClosestEnemyPath(){
-        std::shared_ptr<PathFinder> bestPath;
-        std::vector<std::shared_ptr<WorldTile> > enemies = findDefeatableEnemies();
         int x = _worldModel->protagonist()->getXPos();
         int y= _worldModel->protagonist()->getYPos();
 
@@ -85,11 +54,11 @@ bool Strategy::doNextStep()
         std::deque<Node> tempQue;
         std::deque<Node> resultQue;
 
-        if(enemies.empty()){ // spel gewonnen? niet genoeg health om enemies te verslaan?
+        if(tileList.empty()){ // spel gewonnen? niet genoeg health om enemies te verslaan?
             tempQue.clear();
             return tempQue;
         }
-        for(std::shared_ptr<WorldTile> tile :enemies){
+        for(std::shared_ptr<WorldTile> tile :tileList){
 
             auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
             path->AStarInit();

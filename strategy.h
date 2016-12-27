@@ -24,8 +24,8 @@ private:
 
 
     std::vector<std::shared_ptr<WorldTile> > findDefeatableEnemies();
-    std::deque<Node> findClosestEnemyPath();
-    std::deque<Node> findClosestHealtpackPath();
+    std::deque<Node> findClosestPath(std::vector<std::shared_ptr<WorldTile> > tileList);
+
 };
 
 #endif // STRATEGY_H

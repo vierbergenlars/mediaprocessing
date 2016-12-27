@@ -92,13 +92,14 @@ bool WorldTile::killEnemy()
 
 void WorldTile::addPoisonEffect(float poison)
 {
+
     _poison+=poison;
     emit changed();
 }
 
 float WorldTile::getPoisonEffect() const
 {
-    return _poison;
+    return std::min(_poison,100.f);
 }
 
 std::shared_ptr<Enemy> WorldTile::enemy() const

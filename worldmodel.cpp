@@ -29,7 +29,8 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 {
     assert(-1 <= dx && dx <= 1);
     assert(-1 <= dy && dy <= 1);
-
+    if(_protagonist->getHealth()<=0)
+        return false;
     int newX = _protagonist->getXPos() + dx;
     int newY = _protagonist->getYPos() + dy;
 
@@ -43,8 +44,9 @@ bool WorldModel::moveProtagonist(int dx, int dy)
     if(newEnergy <= 0)
         return false;
     float newHealth= _protagonist->getHealth() + tile->getHealthEffect();
-    if(newHealth<=0)
+    if(newHealth<=0){
         newHealth = 0;
+    }
     if(newHealth >=100)
         newHealth=100;
 
