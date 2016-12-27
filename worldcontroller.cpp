@@ -36,14 +36,14 @@ void WorldController::createWorld(QString file)
         tiles->set(wt->getY(), wt->getX(), wt);
     }
 
-    auto enemiesList = world.getEnemies(2);
+    auto enemiesList = world.getEnemies(8);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
         tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
-    auto healthpacksList = world.getHealthPacks(2);
+    auto healthpacksList = world.getHealthPacks(8);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();
