@@ -24,7 +24,6 @@ WorldController::WorldController(QGraphicsScene *scene)
 WorldController::~WorldController()
 {
     delete worldModel;
-    delete path;
 
 }
 
@@ -128,17 +127,6 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLengt
     });
 }
 
-
-bool WorldController::doPathfinderStep()
-{
-
-    if(path->RunAStarStep()) {
-        path->AStarSolution();
-        return true;
-    }
-   return false;
-}
-
 void WorldController::playStrategy(){
     auto strategy = std::make_shared<Strategy>(worldModel);
     actionTimer.connect([this, strategy]() {
@@ -168,16 +156,6 @@ void WorldController::updateScale(float scaleDiff)
 
 
 
-void WorldController::doPathfinder()
-{
-
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-        path->RunAStar();
-        std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-        qDebug() << duration << "µs";
-
-}
 float WorldController::getProtagonistEnergy(){
 
     return worldModel->protagonist()->getEnergy();

@@ -26,8 +26,6 @@ public:
     void moveProtagonist(int rows, int cols);
     bool debugMode = false;
     void doPathfinderSteps(int xTarget, int yTarget, int timerLength = 100);
-    bool doPathfinderStep();
-    void doPathfinder();
 
     float getProtagonistEnergy();
     float getProtagonistHealth();
@@ -39,7 +37,6 @@ private:
     int scale;
     int range;
     QGraphicsPixmapItem *backgroundImage;
-    PathFinder *path;
     QGraphicsScene *scene;
     WorldModel *worldModel;
     std::vector<GraphicsPosition*> positions;

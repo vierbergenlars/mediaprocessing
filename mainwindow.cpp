@@ -95,32 +95,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Minus:
         controller->updateScale(2);
         break;
-    case Qt::Key_Enter:
-        controller->doPathfinderStep();
-        break;
-    case Qt::Key_A:
-        for(int i=0; i<40; i++)
-            if(controller->doPathfinderStep())
-                break;
-        break;
-    case Qt::Key_B:
-        for(int i=0; i<400; i++)
-            if(controller->doPathfinderStep())
-                break;
-        break;
-    case Qt::Key_C:
-        for(int i=0; i<4000; i++)
-            if(controller->doPathfinderStep())
-                break;
-        break;
-    case Qt::Key_D:
-        for(int i=0; i<40000; i++)
-            if(controller->doPathfinderStep())
-                break;
-        break;
-    case Qt::Key_E:
-        controller->doPathfinder();
-        break;
     case Qt::Key_F:
         controller->debugMode=!controller->debugMode;
         break;
