@@ -56,6 +56,7 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
         connect(&*penemy, &PEnemy::dead, this, &GraphicsPosition::update);
         connect(&*penemy, SIGNAL(poisoned(float)), this, SLOT(update()));
     }
+    update();
 }
 
 QRectF GraphicsPosition::boundingRect() const
