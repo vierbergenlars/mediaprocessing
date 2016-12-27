@@ -24,8 +24,6 @@ public:
     void createWorld(QString world);
     void render();
     void moveProtagonist(int rows, int cols);
-    int range;
-    int scale;
     bool debugMode = false;
     void doPathfinderSteps(int xTarget, int yTarget, int timerLength = 100);
     bool doPathfinderStep();
@@ -35,7 +33,11 @@ public:
     float getProtagonistHealth();
     void playStrategy();
     void stopTimer();
+    void updateScale(float scaleDiff);
+
 private:
+    int scale;
+    int range;
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
     QGraphicsScene *scene;

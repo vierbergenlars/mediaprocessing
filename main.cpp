@@ -19,24 +19,6 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     MainWindow mainWindow;
-
-
-
-    if(argc < 2) {
-        std::cerr << "Pass the world file to use as first parameter" << std::endl;
-        return 1;
-    }
-
-    try {
-        mainWindow.createWorld(argv[1]);
-    } catch(const QString &err) {
-        std::cerr << err.toStdString() << std::endl;
-        return 2;
-    }
     mainWindow.show();
-
-  // controller.doPathfinder();
-
-
     return a.exec();
 }

@@ -4,6 +4,7 @@
 #include <QInputDialog>
 #include <QFormLayout>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), mainView(this)
@@ -23,6 +24,14 @@ MainWindow::MainWindow(QWidget *parent) :
     mainView.setScene(scene);
     toolBar = new QToolBar(this);
     this->addToolBar(toolBar);
+
+    QAction *openAction = new QAction("Open map...", this);
+    toolBar->addAction(openAction);
+    QObject::connect(openAction, &QAction::triggered, [this]() {
+        auto filename = QFileDialog::getOpenFileName(this);
+        if(filename != "")
+            this->createWorld(filename);
+    });
 
     QAction *runAction = new QAction("Run strategy", this);
     toolBar->addAction(runAction);
@@ -51,8 +60,6 @@ void MainWindow::createWorld(QString file)
 {
     controller->createWorld(file);
     controller->render();
-    //mainView.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //mainView.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -78,12 +85,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         controller->moveProtagonist(0, 1);
         break;
     case Qt::Key_Plus:
-        controller->scale/=2;
-        controller->range*=4;
+        controller->updateScale(1.f/2);
         break;
     case Qt::Key_Minus:
-        controller->scale*=2;
-        controller->range/=4;
+        controller->updateScale(2);
         break;
     case Qt::Key_Enter:
         controller->doPathfinderStep();
