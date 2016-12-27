@@ -5,18 +5,20 @@
 #include <QFormLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>
+#include <QStatusBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), mainView(this)
 {
     energyBar = new QProgressBar(&mainView);
-    energyBar->setGeometry(QRect(100,10,120,25));
-
+    energyBar->setFormat("Energy: %v/%m");
     energyBar->setValue(0);
 
     healthBar = new QProgressBar(&mainView);
-    healthBar->setGeometry(QRect(230,10,120,25));
+    healthBar->setFormat("Health: %v/%m");
     healthBar->setValue(0);
+    this->statusBar()->insertPermanentWidget(0, energyBar);
+    this->statusBar()->insertPermanentWidget(1, healthBar);
     this->setCentralWidget(&mainView);
     mainView.show();
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
