@@ -50,11 +50,11 @@ GraphicsPosition::GraphicsPosition(const std::shared_ptr<WorldTile> tile, QGraph
 
     connect(&*tile, &WorldTile::changed, this, &GraphicsPosition::update);
 
-    std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
 
     if(penemy != nullptr) {
         connect(&*penemy, &PEnemy::dead, this, &GraphicsPosition::update);
-        connect(&*penemy, SIGNAL(poisoned(float)), this, SLOT(update()));
+        connect(&*penemy, SIGNAL(poisonLevelUpdated(int)), this, SLOT(update()));
     }
     update();
 }

@@ -59,7 +59,7 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 
     if(tile->killEnemy()) {
         _protagonist->setEnergy(100.0f);
-        std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(enemy);
+        std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
         if(penemy != nullptr) {
             doPoison(tile);
             penemy->poison();
@@ -72,7 +72,7 @@ bool WorldModel::moveProtagonist(int dx, int dy)
 
 void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
 {
-    std::shared_ptr<MyPEnemy> penemy = std::dynamic_pointer_cast<MyPEnemy>(tile->enemy());
+    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(tile->enemy());
     float radius = penemy->getPoisonLevel()/10.0f;
     auto tiles = tilesAround(penemy, radius);
 
@@ -80,7 +80,7 @@ void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
         float distance = std::hypot(tile->getX() - wt->getX(), tile->getY() - wt->getY());
         if(distance > radius)
             continue;
-        QObject::connect(&*penemy, &MyPEnemy::poisoned, [wt, distance](float poison) {
+        QObject::connect(&*penemy, &PEnemy::poisonLevelUpdated, [wt, distance](int poison) {
             if(distance < poison/10.f)
                 wt->addPoisonEffect(10.f);
         });
