@@ -78,8 +78,16 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
     worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
     QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
         this->gprotagonist->setPos(x*this->scale, y*this->scale);
-
     });
+    int searchRange = 0;
+    while(std::isinf(worldModel->tiles()->get(worldModel->protagonist()->getYPos(), worldModel->protagonist()->getXPos())->getDifficulty())) {
+        searchRange++;
+        auto searchTiles = worldModel->tilesAroundProtagonist(searchRange);
+        for(std::shared_ptr<WorldTile> wt: *searchTiles) {
+            if(!std::isinf(wt->getDifficulty()))
+                worldModel->protagonist()->setPos(wt->getX(), wt->getY());
+        }
+    }
     updateScale(1);
 }
 
