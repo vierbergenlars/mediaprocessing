@@ -15,11 +15,7 @@ void WorldTile::setEnemy(std::shared_ptr<Enemy> enemy)
     assert(_enemy == nullptr);
     assert(enemy->getXPos() == getX() && enemy->getYPos() == getY());
     std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
-    if(penemy != nullptr) {
-        _enemy = std::make_shared<MyPEnemy>(penemy);
-    } else {
-        _enemy = enemy;
-    }
+    _enemy = enemy;
 }
 
 void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
@@ -67,7 +63,7 @@ float WorldTile::getHealthpack() const
 float WorldTile::getHealthEffect() const
 {
     float healthEffect = getHealthpack();
-    if(_enemy != nullptr && std::dynamic_pointer_cast<MyPEnemy>(_enemy) == nullptr)
+    if(_enemy != nullptr && std::dynamic_pointer_cast<PEnemy>(_enemy) == nullptr)
         healthEffect-=_enemy->getValue();
     return healthEffect;
 }
