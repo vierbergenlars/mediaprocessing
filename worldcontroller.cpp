@@ -105,6 +105,7 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLengt
     std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
     if(timerLength == 0) {
         pathfinder->RunAStar();
+        pathfinder->showVisuals();
         this->render();
         return;
     }
