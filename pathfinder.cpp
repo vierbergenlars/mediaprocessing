@@ -7,7 +7,7 @@ PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::s
 {
     for(int i =0; i<statusMatrix.rows();i++){
         for(int j = 0; j<statusMatrix.cols();j++){
-            statusMatrix.set(i,j,Status::none);
+            statusMatrix.set(i,j,WorldTile::Status::none);
         }
     }
 
@@ -29,12 +29,11 @@ bool PathFinder::RunAStarStep()
         else{
             return true;}
 
-    } while(statusMatrix.get(currentNode.tile->getY(), currentNode.tile->getX()) == Status::closedlist);
+    } while(statusMatrix.get(currentNode.tile->getY(), currentNode.tile->getX()) == WorldTile::Status::closedlist);
 
 
     //add current node to closed
-    currentNode.tile->setStatus(WorldTile::Status::closedlist);
-    statusMatrix.set(currentNode.tile->getY(),currentNode.tile->getX(),Status::closedlist);
+    statusMatrix.set(currentNode.tile->getY(),currentNode.tile->getX(),WorldTile::Status::closedlist);
 
     if (currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // the current node is the solution node
         solutionNode = currentNode;
@@ -66,9 +65,9 @@ bool PathFinder::RunAStarStep()
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
                     nearbyNode.givenCost = currentNode.givenCost + nearbyNode.tile->getDifficulty();
                     nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10;
-                    if( statusMatrix.get(nearbyNode.tile->getY(),nearbyNode.tile->getX())!= Status::closedlist){ //  if not already in Lists
+                    if( statusMatrix.get(nearbyNode.tile->getY(),nearbyNode.tile->getX())!= WorldTile::Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
-                        nearbyNode.tile->setStatus(WorldTile::Status::openlist);
+                        statusMatrix.set(nearbyNode.tile->getY(),nearbyNode.tile->getX(),WorldTile::Status::openlist);
                     }
 
 
@@ -83,12 +82,13 @@ bool PathFinder::RunAStarStep()
 
 
     //std::sort(openList.begin(),openList.end(),CompareNode); //sort the open list on final cost
+
     return false;
 
 }
 
 void PathFinder::AStarInit()
-{
+{   clearVisuals();
     //step 1 Breadth-First
     Node startNode;
     startNode.parent = nullptr;
@@ -98,7 +98,8 @@ void PathFinder::AStarInit()
 
     //step 2
     openList.push(startNode);
-    startNode.tile->setStatus(WorldTile::Status::openlist);
+    statusMatrix.set(startNode.tile->getY(),startNode.tile->getX(),WorldTile::Status::openlist);
+
 }
 
 std::deque<Node> PathFinder::AStarSolution()
@@ -108,11 +109,11 @@ std::deque<Node> PathFinder::AStarSolution()
     if (solutionFound && currentNode.tile->getX() == _xend && currentNode.tile->getY()== _yend){ // oplossing gevonden
         while(currentNode.parent != nullptr){
             resultList.push_front(currentNode);
-            currentNode.tile->setStatus(WorldTile::Status::solution);
+            statusMatrix.set(currentNode.tile->getY(),currentNode.tile->getX(),WorldTile::Status::solution);
             currentNode = *(currentNode.parent);
         }
         resultList.push_front(currentNode);
-        currentNode.tile->setStatus(WorldTile::Status::solution);
+        statusMatrix.set(currentNode.tile->getY(),currentNode.tile->getX(),WorldTile::Status::solution);
     } //else geen oplossing, resultList is leeg
     return resultList;
 
@@ -135,6 +136,23 @@ std::deque<Node> PathFinder::RunAStar()
 float PathFinder::calcHeuristicScore(int x, int y) // distance to end point
 {
     return (abs(x-_xend)+abs(y-_yend));
+}
+
+void PathFinder::showVisuals(){
+    for(int i =0; i<statusMatrix.rows();i++){
+        for(int j = 0; j<statusMatrix.cols();j++){
+            if(statusMatrix.get(i,j) !=WorldTile::Status::none){
+                _matrix->get(i,j)->setStatus(statusMatrix.get(i,j));
+            }
+        }
+    }
+}
+
+void PathFinder::clearVisuals(){
+    for(auto i : *_matrix){
+        if(i->status() != WorldTile::Status::none)
+            i->setStatus(WorldTile::Status::none);
+    }
 }
 
 

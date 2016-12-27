@@ -36,8 +36,9 @@ public:
     void AStarInit();
     bool RunAStarStep();
     std::deque<Node> AStarSolution();
+    void showVisuals();
+    void clearVisuals();
 private:
-    enum Status {none, openlist, closedlist, solution};
     Node currentBestNode;
     Node solutionNode;
     bool solutionFound = false;
@@ -51,7 +52,7 @@ private:
     int _ystart;
     int _xend;
     int _yend;
-    DenseMatrix<PathFinder::Status> statusMatrix;
+    DenseMatrix<WorldTile::Status> statusMatrix;
 };
 
 

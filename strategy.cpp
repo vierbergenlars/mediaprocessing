@@ -41,7 +41,7 @@ bool Strategy::doNextStep()
 
 }
     std::deque<Node> Strategy::findClosestHealtpackPath(){
-
+        std::shared_ptr<PathFinder> bestPath;
         std::vector<std::shared_ptr<WorldTile> > healtTiles = _worldModel->getHealtPackTiles();
         int x = _worldModel->protagonist()->getXPos();
         int y= _worldModel->protagonist()->getYPos();
@@ -53,14 +53,15 @@ bool Strategy::doNextStep()
             return tempQue; // geen healthpacks meer over?
         }
         for(std::shared_ptr<WorldTile> tile :healtTiles){
-            PathFinder path = PathFinder(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
-            path.AStarInit();
-            tempQue = path.RunAStar();
+            auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
+            path->AStarInit();
+            tempQue = path->RunAStar();
             float cost = tempQue.back().finalCost;
 
-            if(minDistance >cost){
+            if(minDistance >cost){ //nieuw minimum
                 minDistance = cost;
                 resultQue = tempQue;
+                bestPath = path;
             }
         }
         if(minDistance > _worldModel->protagonist()->getEnergy()){
@@ -68,11 +69,13 @@ bool Strategy::doNextStep()
             tempQue.clear();
             return tempQue;
         }
+        bestPath->showVisuals();
         return resultQue;
 
 }
 
     std::deque<Node> Strategy::findClosestEnemyPath(){
+        std::shared_ptr<PathFinder> bestPath;
         std::vector<std::shared_ptr<WorldTile> > enemies = findDefeatableEnemies();
         int x = _worldModel->protagonist()->getXPos();
         int y= _worldModel->protagonist()->getYPos();
@@ -81,21 +84,23 @@ bool Strategy::doNextStep()
 
         std::deque<Node> tempQue;
         std::deque<Node> resultQue;
-        std::shared_ptr<WorldTile> closestEnemy;
+
         if(enemies.empty()){ // spel gewonnen? niet genoeg health om enemies te verslaan?
             tempQue.clear();
             return tempQue;
         }
         for(std::shared_ptr<WorldTile> tile :enemies){
-            PathFinder path = PathFinder(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
-            path.AStarInit();
-            tempQue = path.RunAStar();
+
+            auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
+            path->AStarInit();
+            tempQue = path->RunAStar();
             float cost = tempQue.back().finalCost;
 
             if(minDistance >cost) {
                 minDistance = cost;
-                closestEnemy = tile;
+
                 resultQue = tempQue;
+                bestPath = path;
             }
         }
         if(minDistance > _worldModel->protagonist()->getEnergy()){
@@ -103,6 +108,7 @@ bool Strategy::doNextStep()
             tempQue.clear();
             return tempQue;
         }
+        bestPath->showVisuals();
         return resultQue;
 
     }
