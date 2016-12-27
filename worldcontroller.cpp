@@ -29,6 +29,7 @@ WorldController::~WorldController()
 
 void WorldController::createWorld(QString file, int enemies, int healthpacks)
 {
+    actionTimer.disconnect();
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
