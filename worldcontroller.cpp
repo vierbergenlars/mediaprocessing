@@ -6,11 +6,19 @@
 #include <QDebug>
 #include <QImage>
 #include "worldtile.h"
+#include <QPixmap>
 
 
 WorldController::WorldController(QGraphicsScene *scene)
-    : range(20), scale(10), scene(scene)
+    : range(20), scale(10), scene(scene), worldModel(nullptr)
 {
+    gprotagonist = new GraphicsProtagonist();
+    gprotagonist->setZValue(3);
+    scene->addItem(gprotagonist);
+
+    backgroundImage = new QGraphicsPixmapItem;
+    backgroundImage->setPos(0, 0);
+    scene->addItem(backgroundImage);
 }
 
 WorldController::~WorldController()
@@ -27,9 +35,7 @@ void WorldController::createWorld(QString file)
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
     auto tiles = new DenseMatrix<std::shared_ptr<WorldTile>>(world.getRows(), world.getCols());
 
-    backgroundImage = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(file)));
-    backgroundImage->setPos(0, 0);
-    scene->addItem(backgroundImage);
+    backgroundImage->setPixmap(QPixmap::fromImage(QImage(file)));
 
     for(std::unique_ptr<Tile> &tile: tilesList) {
         std::shared_ptr<WorldTile> wt = std::make_shared<WorldTile>(std::move(tile));
@@ -50,29 +56,27 @@ void WorldController::createWorld(QString file)
         tiles->get(row, col)->setHealthpack(std::move(healthpack));
     }
 
+    for(GraphicsPosition* gp: positions) {
+        scene->removeItem(gp);
+        delete gp;
+    }
+
+    positions.clear();
+
     for(std::shared_ptr<WorldTile> & t: *tiles) {
         if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
         scene->addItem(graphicsPos);
-        graphicsPos->update();
         t->graphicsConstructed=true;
     }
 
+    if(worldModel != nullptr)
+        delete worldModel;
+
     worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
-
-    path = new PathFinder(5,5, 450, 450, tiles); //world map 990 937
-    path->AStarInit();
-
-
-
-
-
-    gprotagonist = new GraphicsProtagonist();
-    gprotagonist->setZValue(3);
-    scene->addItem(gprotagonist);
-
+    updateScale(1);
 }
 
 void WorldController::render()
@@ -82,20 +86,13 @@ void WorldController::render()
             continue;
         auto graphicsPos = new GraphicsPosition(t);
         positions.push_back(graphicsPos);
+        graphicsPos->updateScale(scale);
         scene->addItem(graphicsPos);
-        graphicsPos->update();
         t->graphicsConstructed=true;
     }
 
-    for(GraphicsPosition *&graphicsPos: positions) {
-        graphicsPos->updateScale(scale);
-        graphicsPos->setZValue(2);
-    }
-    backgroundImage->setScale(scale);
-
 
     gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
-    gprotagonist->setScale(scale);
 }
 
 void WorldController::moveProtagonist(int x, int y)
@@ -152,6 +149,18 @@ void WorldController::playStrategy(){
 void WorldController::stopTimer()
 {
     actionTimer.disconnect();
+}
+
+void WorldController::updateScale(float scaleDiff)
+{
+    scale*=scaleDiff;
+    range/=scaleDiff;
+    for(GraphicsPosition *&graphicsPos: positions) {
+        graphicsPos->updateScale(scale);
+    }
+    backgroundImage->setScale(scale);
+    gprotagonist->setScale(scale);
+    gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
 }
 
 
