@@ -28,7 +28,7 @@ WorldController::~WorldController()
 
 }
 
-void WorldController::createWorld(QString file)
+void WorldController::createWorld(QString file, int enemies, int healthpacks)
 {
     World world;
 
@@ -42,14 +42,14 @@ void WorldController::createWorld(QString file)
         tiles->set(wt->getY(), wt->getX(), wt);
     }
 
-    auto enemiesList = world.getEnemies(8);
+    auto enemiesList = world.getEnemies(enemies);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
         tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
-    auto healthpacksList = world.getHealthPacks(8);
+    auto healthpacksList = world.getHealthPacks(healthpacks);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();
@@ -76,6 +76,10 @@ void WorldController::createWorld(QString file)
         delete worldModel;
 
     worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
+    QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
+        this->gprotagonist->setPos(x*this->scale, y*this->scale);
+
+    });
     updateScale(1);
 }
 
@@ -90,9 +94,6 @@ void WorldController::render()
         scene->addItem(graphicsPos);
         t->graphicsConstructed=true;
     }
-
-
-    gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
 }
 
 void WorldController::moveProtagonist(int x, int y)
@@ -105,6 +106,7 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLengt
     std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
     if(timerLength == 0) {
         pathfinder->RunAStar();
+        pathfinder->showVisuals();
         this->render();
         return;
     }
@@ -140,9 +142,10 @@ bool WorldController::doPathfinderStep()
 void WorldController::playStrategy(){
     auto strategy = std::make_shared<Strategy>(worldModel);
     actionTimer.connect([this, strategy]() {
-        bool hasNextStep = strategy->doNextStep();
-        this->render();
-        return hasNextStep;
+        Strategy::StepType hasNextStep = strategy->doNextStep();
+        if(hasNextStep == Strategy::StepType::pathfind)
+            this->render();
+        return hasNextStep != Strategy::StepType::none;
     });
 }
 

@@ -27,10 +27,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QAction *openAction = new QAction("Open map...", this);
     toolBar->addAction(openAction);
-    QObject::connect(openAction, &QAction::triggered, [this]() {
-        auto filename = QFileDialog::getOpenFileName(this);
-        if(filename != "")
-            this->createWorld(filename);
+
+    QFileDialog *mapSelectDialog = new QFileDialog(this);
+    MapConfigInputDialog *mapConfigDialog = new MapConfigInputDialog(this);
+    QObject::connect(openAction, &QAction::triggered, mapSelectDialog, &QFileDialog::exec);
+    QObject::connect(mapSelectDialog, &QFileDialog::accepted, mapConfigDialog, &MapConfigInputDialog::exec);
+    QObject::connect(mapConfigDialog, &MapConfigInputDialog::accepted, [mapSelectDialog, mapConfigDialog, this]() {
+        this->createWorld(mapSelectDialog->selectedFiles().value(0), mapConfigDialog->getEnemies(), mapConfigDialog->getHealthpacks());
+
     });
 
     QAction *runAction = new QAction("Run strategy", this);
@@ -56,9 +60,9 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 }
 
-void MainWindow::createWorld(QString file)
+void MainWindow::createWorld(QString file, int enemies, int healthpacks)
 {
-    controller->createWorld(file);
+    controller->createWorld(file, enemies, healthpacks);
     QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
         this->healthBar->setValue(this->controller->getWorldModel()->protagonist()->getHealth());
         this->energyBar->setValue(this->controller->getWorldModel()->protagonist()->getEnergy());
@@ -155,6 +159,27 @@ CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent
     formLayout->addRow(new QLabel("x position:"), xPos);
     formLayout->addRow(new QLabel("y position:"), yPos);
     formLayout->addRow(new QLabel("Animation speed:"), animationSpeed);
+    mainLayout->addLayout(formLayout);
+
+    QDialogButtonBox* dialogButtons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+    mainLayout->addWidget(dialogButtons);
+
+    connect(dialogButtons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(dialogButtons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+}
+
+MapConfigInputDialog::MapConfigInputDialog(QWidget *parent)
+    :QDialog(parent)
+{
+    setModal(true);
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QFormLayout* formLayout = new QFormLayout;
+    enemies = new QSpinBox(this);
+    enemies->setMinimum(1);
+    healthpacks = new QSpinBox(this);
+    healthpacks->setMinimum(0);
+    formLayout->addRow(new QLabel("number of enemies:"), enemies);
+    formLayout->addRow(new QLabel("number of healthpacks:"), healthpacks);
     mainLayout->addLayout(formLayout);
 
     QDialogButtonBox* dialogButtons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);

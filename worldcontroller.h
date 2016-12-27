@@ -21,7 +21,7 @@ class WorldController
 public:
     WorldController(QGraphicsScene*scene);
     ~WorldController();
-    void createWorld(QString world);
+    void createWorld(QString world, int enemies, int healthpacks);
     void render();
     void moveProtagonist(int rows, int cols);
     bool debugMode = false;
