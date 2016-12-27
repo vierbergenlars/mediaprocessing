@@ -44,23 +44,40 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(runAction);
     QObject::connect(runAction, &QAction::triggered, [this]() {
         this->controller->playStrategy();
+        emit actionRunning(true);
     });
+    QObject::connect(this, &MainWindow::worldLoaded, runAction, &QAction::setEnabled);
 
     QAction *pathfindAction = new QAction("Run pathfinder...", this);
     toolBar->addAction(pathfindAction);
 
-    CoordinateInputDialog *dialog = new CoordinateInputDialog(5, 5, this);
+    QObject::connect(this, &MainWindow::worldLoaded, pathfindAction, &QAction::setEnabled);
+    CoordinateInputDialog *dialog = new CoordinateInputDialog(0, 0, this);
     QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, this]() {
         this->controller->doPathfinderSteps(dialog->getXPos(), dialog->getYPos(), dialog->getAnimationSpeed());
+        emit actionRunning(true);
     });
-    QObject::connect(pathfindAction, &QAction::triggered, dialog, &CoordinateInputDialog::exec);
+    QObject::connect(pathfindAction, &QAction::triggered, [dialog, this]() {
+        dialog->setMaxY(this->controller->getWorldModel()->tiles()->rows()-1);
+        dialog->setMaxX(this->controller->getWorldModel()->tiles()->cols()-1);
+        dialog->exec();
+    });
 
     QAction *stopAction = new QAction("Stop", this);
     toolBar->addAction(stopAction);
 
+    QObject::connect(this, &MainWindow::worldLoaded, stopAction, &QAction::setEnabled);
+    QObject::connect(this, &MainWindow::actionRunning, stopAction, &QAction::setEnabled);
+
     QObject::connect(stopAction, &QAction::triggered, [this]() {
         this->controller->stopTimer();
+        emit this->actionRunning(false);
     });
+
+    QObject::connect(this, &MainWindow::worldLoaded, [this]() {
+        emit this->actionRunning(false);
+    });
+    emit worldLoaded(false);
 }
 
 void MainWindow::createWorld(QString file, int enemies, int healthpacks)
@@ -71,6 +88,7 @@ void MainWindow::createWorld(QString file, int enemies, int healthpacks)
         this->energyBar->setValue(this->controller->getWorldModel()->protagonist()->getEnergy());
     });
     controller->render();
+    emit worldLoaded(true);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
