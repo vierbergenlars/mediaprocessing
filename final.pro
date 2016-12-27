@@ -14,7 +14,6 @@ SOURCES += main.cpp \
     worldtile.cpp \
     worldmodel.cpp \
     strategy.cpp \
-    mypenemy.cpp \
     actiontimer.cpp
 
 unix:!macx: LIBS += -L$$PWD/libworld.so/ -lworld
@@ -39,5 +38,4 @@ HEADERS += \
     worldtile.h \
     worldmodel.h \
     strategy.h \
-    mypenemy.h \
     actiontimer.h

@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <iostream>
-#include "mypenemy.h"
 
 GraphicsProtagonist::GraphicsProtagonist(QGraphicsItem *parent):
     QGraphicsItem(parent), boundingBox(this)
