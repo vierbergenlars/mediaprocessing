@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include <QGraphicsScene>
 #include <QKeyEvent>
+#include <QInputDialog>
+#include <QFormLayout>
+#include <QDialogButtonBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), mainView(this)
@@ -18,6 +21,30 @@ MainWindow::MainWindow(QWidget *parent) :
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
     controller = new WorldController(scene);
     mainView.setScene(scene);
+    toolBar = new QToolBar(this);
+    this->addToolBar(toolBar);
+
+    QAction *runAction = new QAction("Run strategy", this);
+    toolBar->addAction(runAction);
+    QObject::connect(runAction, &QAction::triggered, [this]() {
+        this->controller->playStrategy();
+    });
+
+    QAction *pathfindAction = new QAction("Run pathfinder...", this);
+    toolBar->addAction(pathfindAction);
+
+    CoordinateInputDialog *dialog = new CoordinateInputDialog(5, 5, this);
+    QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, this]() {
+        this->controller->doPathfinderSteps(dialog->getXPos(), dialog->getYPos(), dialog->getAnimationSpeed());
+    });
+    QObject::connect(pathfindAction, &QAction::triggered, dialog, &CoordinateInputDialog::exec);
+
+    QAction *stopAction = new QAction("Stop", this);
+    toolBar->addAction(stopAction);
+
+    QObject::connect(stopAction, &QAction::triggered, [this]() {
+        this->controller->stopTimer();
+    });
 }
 
 void MainWindow::createWorld(QString file)
@@ -99,4 +126,31 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 MainWindow::~MainWindow()
 {
     delete controller;
+}
+
+CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)
+    : QDialog(parent)
+{
+    setModal(true);
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QFormLayout* formLayout = new QFormLayout;
+    xPos = new QSpinBox(this);
+    xPos->setMinimum(0);
+    xPos->setMaximum(maxX);
+    yPos = new QSpinBox(this);
+    yPos->setMinimum(0);
+    yPos->setMaximum(maxY);
+    animationSpeed = new QSpinBox(this);
+    animationSpeed->setMinimum(0);
+    animationSpeed->setMaximum(1000);
+    formLayout->addRow(new QLabel("x position:"), xPos);
+    formLayout->addRow(new QLabel("y position:"), yPos);
+    formLayout->addRow(new QLabel("Animation speed:"), animationSpeed);
+    mainLayout->addLayout(formLayout);
+
+    QDialogButtonBox* dialogButtons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+    mainLayout->addWidget(dialogButtons);
+
+    connect(dialogButtons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(dialogButtons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
