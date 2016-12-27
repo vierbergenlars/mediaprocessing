@@ -76,6 +76,10 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
         delete worldModel;
 
     worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
+    QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
+        this->gprotagonist->setPos(x*this->scale, y*this->scale);
+
+    });
     updateScale(1);
 }
 
@@ -90,9 +94,6 @@ void WorldController::render()
         scene->addItem(graphicsPos);
         t->graphicsConstructed=true;
     }
-
-
-    gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
 }
 
 void WorldController::moveProtagonist(int x, int y)
