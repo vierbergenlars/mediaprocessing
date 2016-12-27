@@ -123,7 +123,7 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLengt
 
         if(solved)
             pathfinder->AStarSolution();
-
+        pathfinder->showVisuals();
         this->render();
         return !solved;
     });
