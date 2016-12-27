@@ -28,7 +28,7 @@ WorldController::~WorldController()
 
 }
 
-void WorldController::createWorld(QString file)
+void WorldController::createWorld(QString file, int enemies, int healthpacks)
 {
     World world;
 
@@ -42,14 +42,14 @@ void WorldController::createWorld(QString file)
         tiles->set(wt->getY(), wt->getX(), wt);
     }
 
-    auto enemiesList = world.getEnemies(8);
+    auto enemiesList = world.getEnemies(enemies);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
         tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
-    auto healthpacksList = world.getHealthPacks(8);
+    auto healthpacksList = world.getHealthPacks(healthpacks);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();

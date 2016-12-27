@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void createWorld(QString file);
+    void createWorld(QString file, int enemies, int healthpacks);
     virtual void keyPressEvent(QKeyEvent* event) override;
     virtual ~MainWindow();
 private:
@@ -32,7 +32,7 @@ class CoordinateInputDialog: public QDialog
 {
 public:
     CoordinateInputDialog(int maxX, int maxY, QWidget *parent = nullptr);
-    virtual ~CoordinateInputDialog() {};
+    virtual ~CoordinateInputDialog() {}
     int getXPos() { return xPos->value(); }
     int getYPos() { return yPos->value(); }
     int getAnimationSpeed() { return animationSpeed->value(); }
@@ -40,6 +40,18 @@ private:
     QSpinBox *xPos;
     QSpinBox *yPos;
     QSpinBox *animationSpeed;
+};
+
+class MapConfigInputDialog: public QDialog
+{
+public:
+    MapConfigInputDialog(QWidget *parent = nullptr);
+    virtual ~MapConfigInputDialog() {}
+    int getEnemies() { return enemies->value(); }
+    int getHealthpacks() { return healthpacks->value(); }
+private:
+    QSpinBox *enemies;
+    QSpinBox *healthpacks;
 };
 
 #endif // MAINWINDOW_H
