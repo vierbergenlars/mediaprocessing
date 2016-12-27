@@ -18,14 +18,13 @@ class WorldController
 {
 public:
     WorldController(QGraphicsScene*scene);
-    ~WorldController();
     void createWorld(QString world, int enemies, int healthpacks);
     void render();
     void moveProtagonist(int rows, int cols);
     bool debugMode = false;
     void doPathfinderSteps(int xTarget, int yTarget, int timerLength = 100);
 
-    WorldModel* getWorldModel();
+    std::shared_ptr<WorldModel> getWorldModel();
     float getProtagonistEnergy();
     float getProtagonistHealth();
     void playStrategy();
@@ -37,7 +36,7 @@ private:
     int range;
     QGraphicsPixmapItem *backgroundImage;
     QGraphicsScene *scene;
-    WorldModel *worldModel;
+    std::shared_ptr<WorldModel> worldModel;
     std::vector<GraphicsPosition*> positions;
     GraphicsProtagonist* gprotagonist;
     ActionTimer actionTimer;

@@ -1,7 +1,7 @@
 #include "strategy.h"
 #include <QDebug>
 
-Strategy::Strategy(WorldModel* worldModel)
+Strategy::Strategy(std::shared_ptr<WorldModel> worldModel)
     :_worldModel(worldModel)
 {
 

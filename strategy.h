@@ -12,13 +12,13 @@ class Strategy
 {
 public:
     enum StepType { none, pathfind, follow };
-    Strategy(WorldModel *worldModel);
+    Strategy(std::shared_ptr<WorldModel> worldModel);
 
 
     StepType doNextStep();
 
 private:
-    WorldModel* _worldModel;
+    std::shared_ptr<WorldModel> _worldModel;
     std::vector<std::shared_ptr<Enemy>> enemys;
     std::vector<std::shared_ptr<WorldTile>> healtTiles;
     std::deque<Node> stepQue;

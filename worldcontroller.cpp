@@ -21,11 +21,6 @@ WorldController::WorldController(QGraphicsScene *scene)
     scene->addItem(backgroundImage);
 }
 
-WorldController::~WorldController()
-{
-    delete worldModel;
-
-}
 
 void WorldController::createWorld(QString file, int enemies, int healthpacks)
 {
@@ -33,7 +28,7 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
-    auto tiles = new DenseMatrix<std::shared_ptr<WorldTile>>(world.getRows(), world.getCols());
+    auto tiles = std::make_shared<DenseMatrix<std::shared_ptr<WorldTile>>>(world.getRows(), world.getCols());
 
     backgroundImage->setPixmap(QPixmap::fromImage(QImage(file)));
 
@@ -72,10 +67,7 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
         t->graphicsConstructed=true;
     }
 
-    if(worldModel != nullptr)
-        delete worldModel;
-
-    worldModel = new WorldModel(tiles, std::move(world.getProtagonist()));
+    worldModel = std::make_shared<WorldModel>(tiles, std::move(world.getProtagonist()));
     QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
         this->gprotagonist->setPos(x*this->scale, y*this->scale);
     });
@@ -164,7 +156,7 @@ void WorldController::updateScale(float scaleDiff)
 }
 
 
-WorldModel* WorldController::getWorldModel()
+std::shared_ptr<WorldModel> WorldController::getWorldModel()
 {
  return worldModel;
 }

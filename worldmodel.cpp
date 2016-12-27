@@ -2,7 +2,7 @@
 #include <cmath>
 #include <QObject>
 
-WorldModel::WorldModel(Matrix<std::shared_ptr<WorldTile> > *tiles, std::shared_ptr<Protagonist> protagonist)
+WorldModel::WorldModel(std::shared_ptr<Matrix<std::shared_ptr<WorldTile> > > tiles, std::shared_ptr<Protagonist> protagonist)
     :_tiles(tiles), _protagonist(protagonist)
 {
 
@@ -84,11 +84,6 @@ void WorldModel::doPoison(std::shared_ptr<WorldTile> tile)
                 wt->addPoisonEffect(10.f);
         });
     }
-}
-
-WorldModel::~WorldModel()
-{
-    delete _tiles;
 }
 
 std::vector<std::shared_ptr<WorldTile> > WorldModel::getEnemyTiles()
