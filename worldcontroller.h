@@ -13,6 +13,7 @@
 #include "worldmodel.h"
 #include "strategy.h"
 #include <QTimer>
+#include "actiontimer.h"
 class PathFinder;
 
 class WorldController
@@ -26,12 +27,14 @@ public:
     int range;
     int scale;
     bool debugMode = false;
+    void doPathfinderSteps(int xTarget, int yTarget, int timerLength = 100);
     bool doPathfinderStep();
     void doPathfinder();
 
     float getProtagonistEnergy();
     float getProtagonistHealth();
     void playStrategy();
+    void stopTimer();
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
@@ -39,8 +42,7 @@ private:
     WorldModel *worldModel;
     std::vector<GraphicsPosition*> positions;
     GraphicsProtagonist* gprotagonist;
-    Strategy *strategy;
-    QTimer timer;
+    ActionTimer actionTimer;
 };
 
 #endif // WORLDCONTROLLER_H

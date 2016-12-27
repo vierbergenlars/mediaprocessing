@@ -11,14 +11,12 @@
 WorldController::WorldController(QGraphicsScene *scene)
     : range(20), scale(10), scene(scene)
 {
-    timer.setInterval(500);
 }
 
 WorldController::~WorldController()
 {
     delete worldModel;
     delete path;
-    delete strategy;
 
 }
 
@@ -38,14 +36,14 @@ void WorldController::createWorld(QString file)
         tiles->set(wt->getY(), wt->getX(), wt);
     }
 
-    auto enemiesList = world.getEnemies(2);
+    auto enemiesList = world.getEnemies(8);
     for(std::unique_ptr<Enemy> &enemy: enemiesList) {
         int row = enemy->getYPos();
         int col = enemy->getXPos();
         tiles->get(row, col)->setEnemy(std::move(enemy));
     }
 
-    auto healthpacksList = world.getHealthPacks(2);
+    auto healthpacksList = world.getHealthPacks(8);
     for(std::unique_ptr<Tile> &healthpack: healthpacksList) {
         int row = healthpack->getYPos();
         int col = healthpack->getXPos();
@@ -75,7 +73,6 @@ void WorldController::createWorld(QString file)
     gprotagonist->setZValue(3);
     scene->addItem(gprotagonist);
 
-    strategy = new Strategy(worldModel);
 }
 
 void WorldController::render()
@@ -106,6 +103,32 @@ void WorldController::moveProtagonist(int x, int y)
     worldModel->moveProtagonist(x, y);
 }
 
+void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLength)
+{
+    std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
+    if(timerLength == 0) {
+        pathfinder->RunAStar();
+        this->render();
+        return;
+    }
+
+    pathfinder->AStarInit();
+    actionTimer.connect([this, pathfinder, timerLength]()->bool {
+        int i = 0;
+        bool solved = false;
+        do {
+            i++;
+            solved = pathfinder->RunAStarStep();
+        } while(i < timerLength && !solved);
+
+        if(solved)
+            pathfinder->AStarSolution();
+
+        this->render();
+        return !solved;
+    });
+}
+
 
 bool WorldController::doPathfinderStep()
 {
@@ -118,12 +141,17 @@ bool WorldController::doPathfinderStep()
 }
 
 void WorldController::playStrategy(){
-    QObject::connect(&timer, &QTimer::timeout, [this]() {
-        if(!this->strategy->doNextStep())
-            this->timer.stop();
+    auto strategy = std::make_shared<Strategy>(worldModel);
+    actionTimer.connect([this, strategy]() {
+        bool hasNextStep = strategy->doNextStep();
         this->render();
+        return hasNextStep;
     });
-    timer.start();
+}
+
+void WorldController::stopTimer()
+{
+    actionTimer.disconnect();
 }
 
 
