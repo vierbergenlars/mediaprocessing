@@ -11,6 +11,8 @@ Strategy::Strategy(WorldModel* worldModel)
 Strategy::StepType Strategy::doNextStep()
 {
     StepType stepType = follow;
+    if(_worldModel->protagonist()->getHealth() <= 0)
+        return none;
     if(stepQue.empty()){ //que empty = zoek nieuwe destinatie
         stepType = pathfind;
      std::vector<std::shared_ptr<WorldTile> > enemies = findDefeatableEnemies();
