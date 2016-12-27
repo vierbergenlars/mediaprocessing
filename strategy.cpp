@@ -8,9 +8,11 @@ Strategy::Strategy(WorldModel* worldModel)
 
 }
 
-bool Strategy::doNextStep()
+Strategy::StepType Strategy::doNextStep()
 {
+    StepType stepType = follow;
     if(stepQue.empty()){ //que empty = zoek nieuwe destinatie
+        stepType = pathfind;
      std::vector<std::shared_ptr<WorldTile> > enemies = findDefeatableEnemies();
      std::deque<Node> tempQue =findClosestPath(enemies);
      if(!tempQue.empty()){
@@ -21,13 +23,11 @@ bool Strategy::doNextStep()
          stepQue =findClosestPath(healtTiles);
      }
 
-     if(stepQue.empty()){
-          qDebug() << "No moves left";
-          return false;
-     }
-     else
-         return doNextStep();
 
+        if(stepQue.empty()){
+            qDebug() << "No moves left";
+            return none;
+        }
     }
 
     Node nextPos = stepQue.front();
@@ -35,11 +35,7 @@ bool Strategy::doNextStep()
     int dX= nextPos.tile->getX() - _worldModel->protagonist()->getXPos();
     int dY = nextPos.tile->getY() - _worldModel->protagonist()->getYPos();
     _worldModel->moveProtagonist(dX,dY);
-    return true;
-
-
-
-
+    return stepType;
 }
 
 

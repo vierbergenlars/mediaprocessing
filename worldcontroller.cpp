@@ -141,9 +141,10 @@ bool WorldController::doPathfinderStep()
 void WorldController::playStrategy(){
     auto strategy = std::make_shared<Strategy>(worldModel);
     actionTimer.connect([this, strategy]() {
-        bool hasNextStep = strategy->doNextStep();
-        this->render();
-        return hasNextStep;
+        Strategy::StepType hasNextStep = strategy->doNextStep();
+        if(hasNextStep == Strategy::StepType::pathfind)
+            this->render();
+        return hasNextStep != Strategy::StepType::none;
     });
 }
 

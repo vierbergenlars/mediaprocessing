@@ -11,10 +11,11 @@
 class Strategy
 {
 public:
+    enum StepType { none, pathfind, follow };
     Strategy(WorldModel *worldModel);
 
 
-    bool doNextStep();
+    StepType doNextStep();
 
 private:
     WorldModel* _worldModel;
