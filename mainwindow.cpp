@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(openAction);
 
     QFileDialog *mapSelectDialog = new QFileDialog(this);
+    mapSelectDialog->setMimeTypeFilters(QStringList(QString("image/png")));
     MapConfigInputDialog *mapConfigDialog = new MapConfigInputDialog(this);
     QObject::connect(openAction, &QAction::triggered, mapSelectDialog, &QFileDialog::exec);
     QObject::connect(mapSelectDialog, &QFileDialog::accepted, mapConfigDialog, &MapConfigInputDialog::exec);
