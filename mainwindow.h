@@ -36,8 +36,8 @@ class CoordinateInputDialog: public QDialog
 public:
     CoordinateInputDialog(int maxX, int maxY, QWidget *parent = nullptr);
     virtual ~CoordinateInputDialog() {}
-    int setMaxX(int x) { xPos->setMaximum(x);}
-    int setMaxY(int y) { yPos->setMaximum(y); }
+    void setMaxX(int x) { xPos->setMaximum(x);}
+    void setMaxY(int y) { yPos->setMaximum(y); }
     int getXPos() { return xPos->value(); }
     int getYPos() { return yPos->value(); }
     int getAnimationSpeed() { return animationSpeed->value(); }
