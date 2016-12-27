@@ -14,8 +14,6 @@
 #include "strategy.h"
 #include <QTimer>
 #include "actiontimer.h"
-class PathFinder;
-
 class WorldController
 {
 public:

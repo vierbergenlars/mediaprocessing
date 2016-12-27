@@ -19,12 +19,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void createWorld(QString file, int enemies, int healthpacks);
     virtual void keyPressEvent(QKeyEvent* event) override;
-    virtual ~MainWindow();
+    virtual ~MainWindow() {}
 signals:
     void worldLoaded(bool);
     void actionRunning(bool);
 private:
-    WorldController *controller;
+    std::shared_ptr<WorldController> controller;
     QGraphicsView mainView;
     QProgressBar *energyBar;
     QProgressBar *healthBar;

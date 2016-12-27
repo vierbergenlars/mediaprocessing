@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setCentralWidget(&mainView);
     mainView.show();
     QGraphicsScene* scene = new QGraphicsScene(&mainView);
-    controller = new WorldController(scene);
+    controller = std::make_shared<WorldController>(scene);
     mainView.setScene(scene);
     toolBar = new QToolBar(this);
     this->addToolBar(toolBar);
@@ -129,11 +129,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     healthBar->setValue(controller->getProtagonistHealth());
 
     controller->render();
-}
-
-MainWindow::~MainWindow()
-{
-    delete controller;
 }
 
 CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)
