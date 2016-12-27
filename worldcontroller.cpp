@@ -7,9 +7,11 @@
 #include <QImage>
 #include "worldtile.h"
 
+
 WorldController::WorldController(QGraphicsScene *scene)
     : range(20), scale(10), scene(scene)
 {
+    timer.setInterval(500);
 }
 
 WorldController::~WorldController()
@@ -108,13 +110,24 @@ void WorldController::moveProtagonist(int x, int y)
 bool WorldController::doPathfinderStep()
 {
 
-    strategy->getNextStep();
-//    if(path->RunAStarStep()) {
-//        path->AStarSolution();
-//        return true;
-//    }
+    if(path->RunAStarStep()) {
+        path->AStarSolution();
+        return true;
+    }
    return false;
 }
+
+void WorldController::playStrategy(){
+    QObject::connect(&timer, &QTimer::timeout, [this]() {
+        if(!this->strategy->doNextStep())
+            this->timer.stop();
+        this->render();
+    });
+    timer.start();
+}
+
+
+
 void WorldController::doPathfinder()
 {
 

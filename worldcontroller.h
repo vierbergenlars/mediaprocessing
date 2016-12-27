@@ -12,6 +12,7 @@
 #include "graphicstile.h"
 #include "worldmodel.h"
 #include "strategy.h"
+#include <QTimer>
 class PathFinder;
 
 class WorldController
@@ -30,6 +31,7 @@ public:
 
     float getProtagonistEnergy();
     float getProtagonistHealth();
+    void playStrategy();
 private:
     QGraphicsPixmapItem *backgroundImage;
     PathFinder *path;
@@ -38,6 +40,7 @@ private:
     std::vector<GraphicsPosition*> positions;
     GraphicsProtagonist* gprotagonist;
     Strategy *strategy;
+    QTimer timer;
 };
 
 #endif // WORLDCONTROLLER_H

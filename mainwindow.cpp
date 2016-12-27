@@ -86,6 +86,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         break;
     case Qt::Key_F:
         controller->debugMode=!controller->debugMode;
+        break;
+    case Qt::Key_P:
+        controller->playStrategy();
     }
     energyBar->setValue(controller->getProtagonistEnergy());
     healthBar->setValue(controller->getProtagonistHealth());

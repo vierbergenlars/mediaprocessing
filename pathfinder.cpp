@@ -49,8 +49,10 @@ bool PathFinder::RunAStarStep()
     std::shared_ptr<Node> parent_ptr = std::make_shared<Node>(currentNode);
     for(int i= -1; i<=1;i++){ // ga alle posities rond current af
         for(int j=-1; j <= 1; j++){
-            if(i==0 && j==0) continue;// no need to do the current node all over again.
-            if(!(i==0 || j==0)) continue; // no diagonals
+            if(i==0 && j==0)
+                continue;// no need to do the current node all over again.
+            if(!(i==0 || j==0))
+                continue; // no diagonals
             int x = currentNode.tile->getX() +i;
             int y = currentNode.tile->getY() +j;
 

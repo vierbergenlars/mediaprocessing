@@ -8,7 +8,7 @@ Strategy::Strategy(WorldModel* worldModel)
 
 }
 
-void Strategy::getNextStep()
+bool Strategy::doNextStep()
 {
     if(stepQue.empty()){ //que empty = zoek nieuwe destinatie
 
@@ -22,12 +22,10 @@ void Strategy::getNextStep()
 
      if(stepQue.empty()){
           qDebug() << "No moves left";
-          return;
+          return false;
      }
      else
-         getNextStep();
-
-
+         return doNextStep();
 
     }
 
@@ -36,6 +34,7 @@ void Strategy::getNextStep()
     int dX= nextPos.tile->getX() - _worldModel->protagonist()->getXPos();
     int dY = nextPos.tile->getY() - _worldModel->protagonist()->getYPos();
     _worldModel->moveProtagonist(dX,dY);
+    return true;
 
 
 
