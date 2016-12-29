@@ -33,6 +33,8 @@ public:
     void runPathfinder(int targetX, int targetY);
     void stopAction();
     virtual ~MainWindowCentralWidget() = default;
+private slots:
+    void setHeuristicsWeight(double weight) { heuristicsWeight = weight; }
 signals:
     void worldLoaded(int rows, int cols);
     void healthUpdated(int health);

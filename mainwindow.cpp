@@ -6,6 +6,7 @@
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QStatusBar>
+#include <QDoubleSpinBox>
 #include <cmath>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -95,8 +96,8 @@ void MainWindowCentralWidget::createWorld(QString file, int enemies, int healthp
     });
     controller->render();
     emit worldLoaded(controller->getWorldModel()->tiles()->rows(), controller->getWorldModel()->tiles()->cols());
-    emit this->healthUpdated(this->controller->getWorldModel()->protagonist()->getHealth());
-    emit this->energyUpdated(this->controller->getWorldModel()->protagonist()->getEnergy());
+    emit healthUpdated(controller->getWorldModel()->protagonist()->getHealth());
+    emit energyUpdated(controller->getWorldModel()->protagonist()->getEnergy());
 }
 
 void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
@@ -154,14 +155,14 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     controller = std::make_shared<WorldController>(graphicsView);
 
     // Controls panel
-    QHBoxLayout *controlsLayout = new QHBoxLayout;
+    QFormLayout *controlsLayout = new QFormLayout;
     layout->addLayout(controlsLayout);
 
     // Animation speed
     QSlider *animationSpeed = new QSlider(Qt::Horizontal, this);
     animationSpeed->setMinimum(1);
     animationSpeed->setMaximum(100);
-    controlsLayout->addWidget(animationSpeed);
+    controlsLayout->addRow(new QLabel("Animation speed"), animationSpeed);
 
     QObject::connect(animationSpeed, &QSlider::valueChanged, [this](int value) {
         this->controller->updateAnimationSpeed(value);
@@ -171,20 +172,19 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     QSlider *sceneScale = new QSlider(Qt::Horizontal, this);
     sceneScale->setMinimum(0);
     sceneScale->setMaximum(1000);
-    controlsLayout->addWidget(sceneScale);
+    controlsLayout->addRow(new QLabel("Scale"), sceneScale);
     QObject::connect(sceneScale, &QSlider::valueChanged, [this](int value) {
         this->graphicsView->setTransform(QTransform::fromScale(std::pow(2, value/100.f)/10.f, std::pow(2, value/100.f)/10.f));
     });
 
     // Heuristic weight
-    QSlider *heuristicsWeight = new QSlider(Qt::Horizontal, this);
-    controlsLayout->addWidget(heuristicsWeight);
-    heuristicsWeight->setMinimum(0);
-    heuristicsWeight->setMaximum(100);
+    QDoubleSpinBox *heuristicsWeight = new QDoubleSpinBox(this);
+    heuristicsWeight->setMinimum(0.f);
+    heuristicsWeight->setMaximum(10.f);
+    heuristicsWeight->setSingleStep(0.01f);
+    controlsLayout->addRow(new QLabel("Heuristics weight"), heuristicsWeight);
 
-    QObject::connect(heuristicsWeight, &QSlider::valueChanged, [this](int value) {
-        this->heuristicsWeight = value/10.f;
-    });
+    QObject::connect(heuristicsWeight, SIGNAL(valueChanged(double)), this, SLOT(setHeuristicsWeight(double)));
     // Disable adjusting heuristics weight when an action is running (it has no effect anyways)
     QObject::connect(&controller->getTimer(), &ActionTimer::activated, heuristicsWeight, &QSlider::setDisabled);
 
@@ -192,7 +192,7 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     // Controls startup values
     animationSpeed->setValue(5);
     sceneScale->setValue(100);
-    heuristicsWeight->setValue(10);
+    heuristicsWeight->setValue(0.1f);
 }
 
 CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)
