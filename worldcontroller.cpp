@@ -83,13 +83,13 @@ void WorldController::moveProtagonist(int x, int y)
     worldModel->moveProtagonist(x, y);
 }
 
-void WorldController::doPathfinderSteps(int xTarget, int yTarget)
+void WorldController::doPathfinderSteps(int xTarget, int yTarget, float heuristicsWeight)
 {
     if(std::isinf(worldModel->tiles()->get(yTarget, xTarget)->getDifficulty())) {
         qDebug() << "Sorry, I'm not going to visit an unreachable tile.";
         return;
     }
-    std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
+    std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles(), heuristicsWeight);
 
     pathfinder->AStarInit();
     actionTimer.connect([this, pathfinder]()->bool {
@@ -108,8 +108,8 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget)
     });
 }
 
-void WorldController::playStrategy(){
-    auto strategy = std::make_shared<Strategy>(worldModel);
+void WorldController::playStrategy(float heuristicsWeight){
+    auto strategy = std::make_shared<Strategy>(worldModel, heuristicsWeight);
     actionTimer.connect([this, strategy]() {
         int i = 0;
         Strategy::StepType hasNextStep = Strategy::StepType::none;

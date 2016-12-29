@@ -12,12 +12,13 @@ class Strategy
 {
 public:
     enum StepType { none, pathfind, follow };
-    Strategy(std::shared_ptr<WorldModel> worldModel);
+    Strategy(std::shared_ptr<WorldModel> worldModel, float heuristicsWeight);
 
 
     StepType doNextStep();
 
 private:
+    float heuristicsWeight;
     std::shared_ptr<WorldModel> _worldModel;
     std::deque<Node> stepQue;
 

@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, std::shared_ptr<Matrix<std::shared_ptr<WorldTile> > > matrix):
-    _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix) ,statusMatrix(matrix->rows(), matrix->cols())
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, std::shared_ptr<Matrix<std::shared_ptr<WorldTile> > > matrix, float heuristicsWeight):
+    _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix) ,statusMatrix(matrix->rows(), matrix->cols()), heuristicsWeight(heuristicsWeight)
 {
     for(int i =0; i<statusMatrix.rows();i++){
         for(int j = 0; j<statusMatrix.cols();j++){
@@ -64,7 +64,7 @@ bool PathFinder::RunAStarStep()
 
                     nearbyNode.parent= parent_ptr; // set parent pointer to current node
                     nearbyNode.givenCost = currentNode.givenCost + nearbyNode.tile->getDifficulty() +0.01;
-                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y)/10 ;
+                    nearbyNode.finalCost = nearbyNode.givenCost + calcHeuristicScore(x,y);
                     if( statusMatrix.get(nearbyNode.tile->getY(),nearbyNode.tile->getX())!= WorldTile::Status::closedlist){ //  if not already in Lists
                         openList.push(nearbyNode); //add to open list
                         statusMatrix.set(nearbyNode.tile->getY(),nearbyNode.tile->getX(),WorldTile::Status::openlist);
@@ -138,7 +138,7 @@ float PathFinder::calcHeuristicScore(int x, int y) // distance to end point
     if((x != _xend || y != _yend) && _matrix->get(y,x)->hasItem()){
         return std::numeric_limits<float>::infinity();
     }
-    return std::hypot(abs(x-_xend),abs(y-_yend));
+    return heuristicsWeight*std::hypot(x-_xend,y-_yend);
 }
 
 void PathFinder::showVisuals(){

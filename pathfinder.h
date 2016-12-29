@@ -30,7 +30,7 @@ class PathFinder
 {
 public:
 
-    PathFinder(int xstart, int ystart, int xend, int yend, std::shared_ptr<Matrix<std::shared_ptr<WorldTile>>> matrix);
+    PathFinder(int xstart, int ystart, int xend, int yend, std::shared_ptr<Matrix<std::shared_ptr<WorldTile>>> matrix, float heuristicsWeight);
     std::deque<Node> Run();
     std::deque<Node> RunAStar();
     void AStarInit();
@@ -47,6 +47,7 @@ private:
     std::priority_queue<Node,std::deque<Node>, CompareNode> openList;
     std::deque<Node> closedList;
     std::deque<Node> resultList;
+    float heuristicsWeight;
     int _xstart;
     int _ystart;
     int _xend;

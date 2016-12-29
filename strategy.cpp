@@ -1,8 +1,8 @@
 #include "strategy.h"
 #include <QDebug>
 
-Strategy::Strategy(std::shared_ptr<WorldModel> worldModel)
-    :_worldModel(worldModel)
+Strategy::Strategy(std::shared_ptr<WorldModel> worldModel, float heuristicsWeight)
+    :_worldModel(worldModel), heuristicsWeight(heuristicsWeight)
 {
 
 
@@ -58,7 +58,7 @@ Strategy::StepType Strategy::doNextStep()
         }
         for(std::shared_ptr<WorldTile> tile :tileList){
 
-            auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles());
+            auto path = std::make_shared<PathFinder>(x,y,tile->getX(), tile->getY(), _worldModel->tiles(), heuristicsWeight);
             tempQue = path->RunAStar();
             if(tempQue.empty())
                 continue;

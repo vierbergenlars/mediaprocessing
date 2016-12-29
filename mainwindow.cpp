@@ -6,6 +6,7 @@
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QStatusBar>
+#include <cmath>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -123,19 +124,17 @@ void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F:
         controller->debugMode=!controller->debugMode;
         break;
-    case Qt::Key_P:
-        controller->playStrategy();
     }
 }
 
 void MainWindowCentralWidget::runStrategy()
 {
-    this->controller->playStrategy();
+    this->controller->playStrategy(heuristicsWeight);
 }
 
 void MainWindowCentralWidget::runPathfinder(int targetX, int targetY)
 {
-    this->controller->doPathfinderSteps(targetX, targetY);
+    this->controller->doPathfinderSteps(targetX, targetY, heuristicsWeight);
 }
 
 void MainWindowCentralWidget::stopAction()
@@ -154,11 +153,14 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     QGraphicsScene *scene = new QGraphicsScene(graphicsView);
     graphicsView->setScene(scene);
 
+    // Controller
+    controller = std::make_shared<WorldController>(graphicsView);
 
     // Controls panel
     QHBoxLayout *controlsLayout = new QHBoxLayout;
     layout->addLayout(controlsLayout);
 
+    // Animation speed
     QSlider *animationSpeed = new QSlider(Qt::Horizontal, this);
     animationSpeed->setMinimum(1);
     animationSpeed->setMaximum(100);
@@ -176,8 +178,23 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
         this->graphicsView->setTransform(QTransform::fromScale(value/100.f, value/100.f));
     });
 
-    // Controller
-    controller = std::make_shared<WorldController>(graphicsView);
+    // Heuristic weight
+    QSlider *heuristicsWeight = new QSlider(Qt::Horizontal, this);
+    controlsLayout->addWidget(heuristicsWeight);
+    heuristicsWeight->setMinimum(0);
+    heuristicsWeight->setMaximum(100);
+
+    QObject::connect(heuristicsWeight, &QSlider::valueChanged, [this](int value) {
+        this->heuristicsWeight = value/10.f;
+    });
+    // Disable adjusting heuristics weight when an action is running (it has no effect anyways)
+    QObject::connect(&controller->getTimer(), &ActionTimer::activated, heuristicsWeight, &QSlider::setDisabled);
+
+
+    // Controls startup values
+    animationSpeed->setValue(5);
+    sceneScale->setValue(1);
+    heuristicsWeight->setValue(10);
 }
 
 CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)

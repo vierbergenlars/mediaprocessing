@@ -22,12 +22,12 @@ public:
     void render();
     void moveProtagonist(int rows, int cols);
     bool debugMode = false;
-    void doPathfinderSteps(int xTarget, int yTarget);
+    void doPathfinderSteps(int xTarget, int yTarget, float heuristicsWeight);
 
     std::shared_ptr<WorldModel> getWorldModel();
     float getProtagonistEnergy();
     float getProtagonistHealth();
-    void playStrategy();
+    void playStrategy(float heuristicsWeight);
     void stopTimer();
     void updateAnimationSpeed(int speed) { animationSpeed = speed; }
 

@@ -40,6 +40,7 @@ signals:
 private:
     QGraphicsView *graphicsView;
     std::shared_ptr<WorldController> controller;
+    float heuristicsWeight = 1.f;
 };
 
 class CoordinateInputDialog: public QDialog
