@@ -81,6 +81,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindowCentralWidget::createWorld(QString file, int enemies, int healthpacks)
 {
+    QGraphicsScene* newScene = new QGraphicsScene(this);
+    QGraphicsScene* oldScene = graphicsView->scene();
+    graphicsView->setScene(newScene);
+    delete oldScene;
+
+
     controller->createWorld(file, enemies, healthpacks);
     QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int, int) {
         emit this->healthUpdated(this->controller->getWorldModel()->protagonist()->getHealth());
