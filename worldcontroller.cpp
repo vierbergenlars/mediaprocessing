@@ -9,28 +9,28 @@
 #include <QPixmap>
 
 
-WorldController::WorldController(QGraphicsScene *scene)
-    : range(20), scale(10), scene(scene), worldModel(nullptr)
+WorldController::WorldController(QGraphicsView *view)
+    : range(20), view(view), worldModel(nullptr)
 {
-    gprotagonist = new GraphicsProtagonist();
-    gprotagonist->setZValue(3);
-    scene->addItem(gprotagonist);
-
-    backgroundImage = new QGraphicsPixmapItem;
-    backgroundImage->setPos(0, 0);
-    scene->addItem(backgroundImage);
 }
 
 
 void WorldController::createWorld(QString file, int enemies, int healthpacks)
 {
     actionTimer.disconnect();
+    GraphicsProtagonist *gprotagonist = new GraphicsProtagonist();
+    gprotagonist->setZValue(3);
+    view->scene()->addItem(gprotagonist);
+
     World world;
 
     std::vector<std::unique_ptr<Tile>> tilesList = world.createWorld(file);
     auto tiles = std::make_shared<DenseMatrix<std::shared_ptr<WorldTile>>>(world.getRows(), world.getCols());
 
+    QGraphicsPixmapItem *backgroundImage = new QGraphicsPixmapItem;
+    backgroundImage->setPos(0, 0);
     backgroundImage->setPixmap(QPixmap::fromImage(QImage(file)));
+    view->scene()->addItem(backgroundImage);
 
     for(std::unique_ptr<Tile> &tile: tilesList) {
         std::shared_ptr<WorldTile> wt = std::make_shared<WorldTile>(std::move(tile));
@@ -51,25 +51,9 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
         tiles->get(row, col)->setHealthpack(std::move(healthpack));
     }
 
-    for(GraphicsPosition* gp: positions) {
-        scene->removeItem(gp);
-        delete gp;
-    }
-
-    positions.clear();
-
-    for(std::shared_ptr<WorldTile> & t: *tiles) {
-        if(!t->hasDrawable() || t->graphicsConstructed)
-            continue;
-        auto graphicsPos = new GraphicsPosition(t);
-        positions.push_back(graphicsPos);
-        scene->addItem(graphicsPos);
-        t->graphicsConstructed=true;
-    }
-
     worldModel = std::make_shared<WorldModel>(tiles, std::move(world.getProtagonist()));
-    QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
-        this->gprotagonist->setPos(x*this->scale, y*this->scale);
+    QObject::connect(&*worldModel->protagonist(), &Protagonist::posChanged, [gprotagonist](int x, int y) {
+        gprotagonist->setPos(x, y);
     });
     int searchRange = 0;
     while(std::isinf(worldModel->tiles()->get(worldModel->protagonist()->getYPos(), worldModel->protagonist()->getXPos())->getDifficulty())) {
@@ -80,7 +64,6 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
                 worldModel->protagonist()->setPos(wt->getX(), wt->getY());
         }
     }
-    updateScale(1);
 }
 
 void WorldController::render()
@@ -89,9 +72,8 @@ void WorldController::render()
         if(!t->hasDrawable() || t->graphicsConstructed)
             continue;
         auto graphicsPos = new GraphicsPosition(t);
-        positions.push_back(graphicsPos);
-        graphicsPos->updateScale(scale);
-        scene->addItem(graphicsPos);
+        graphicsPos->setPos(t->getX(), t->getY());
+        view->scene()->addItem(graphicsPos);
         t->graphicsConstructed=true;
     }
 }
@@ -101,24 +83,22 @@ void WorldController::moveProtagonist(int x, int y)
     worldModel->moveProtagonist(x, y);
 }
 
-void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLength)
+void WorldController::doPathfinderSteps(int xTarget, int yTarget)
 {
-    std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
-    if(timerLength == 0) {
-        pathfinder->RunAStar();
-        pathfinder->showVisuals();
-        this->render();
+    if(std::isinf(worldModel->tiles()->get(yTarget, xTarget)->getDifficulty())) {
+        qDebug() << "Sorry, I'm not going to visit an unreachable tile.";
         return;
     }
+    std::shared_ptr<PathFinder> pathfinder = std::make_shared<PathFinder>(worldModel->protagonist()->getXPos(), worldModel->protagonist()->getYPos(), xTarget, yTarget, worldModel->tiles());
 
     pathfinder->AStarInit();
-    actionTimer.connect([this, pathfinder, timerLength]()->bool {
+    actionTimer.connect([this, pathfinder]()->bool {
         int i = 0;
         bool solved = false;
         do {
             i++;
             solved = pathfinder->RunAStarStep();
-        } while(i < timerLength && !solved);
+        } while(i < std::pow(10, this->animationSpeed/10.f) && !solved);
 
         if(solved)
             pathfinder->AStarSolution();
@@ -131,9 +111,14 @@ void WorldController::doPathfinderSteps(int xTarget, int yTarget, int timerLengt
 void WorldController::playStrategy(){
     auto strategy = std::make_shared<Strategy>(worldModel);
     actionTimer.connect([this, strategy]() {
-        Strategy::StepType hasNextStep = strategy->doNextStep();
-        if(hasNextStep == Strategy::StepType::pathfind)
-            this->render();
+        int i = 0;
+        Strategy::StepType hasNextStep = Strategy::StepType::none;
+        do {
+            i++;
+            hasNextStep = strategy->doNextStep();
+            if(hasNextStep == Strategy::StepType::pathfind)
+                this->render();
+        } while(i < this->animationSpeed && hasNextStep != Strategy::StepType::none);
         return hasNextStep != Strategy::StepType::none;
     });
 }
@@ -141,18 +126,6 @@ void WorldController::playStrategy(){
 void WorldController::stopTimer()
 {
     actionTimer.disconnect();
-}
-
-void WorldController::updateScale(float scaleDiff)
-{
-    scale*=scaleDiff;
-    range/=scaleDiff;
-    for(GraphicsPosition *&graphicsPos: positions) {
-        graphicsPos->updateScale(scale);
-    }
-    backgroundImage->setScale(scale);
-    gprotagonist->setScale(scale);
-    gprotagonist->setPos(worldModel->protagonist()->getXPos()*scale, worldModel->protagonist()->getYPos()*scale);
 }
 
 

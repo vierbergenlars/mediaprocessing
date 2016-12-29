@@ -30,7 +30,7 @@ public:
     void createWorld(QString file, int enemies, int healthpacks);
     virtual void keyPressEvent(QKeyEvent* event) override;
     void runStrategy();
-    void runPathfinder(int targetX, int targetY, int animationSpeed);
+    void runPathfinder(int targetX, int targetY);
     void stopAction();
     virtual ~MainWindowCentralWidget() = default;
 signals:
@@ -38,6 +38,7 @@ signals:
     void healthUpdated(int health);
     void energyUpdated(int energy);
 private:
+    QGraphicsView *graphicsView;
     std::shared_ptr<WorldController> controller;
 };
 
@@ -51,13 +52,11 @@ public:
     void setMaxY(int y) { yPos->setMaximum(y); }
     int getXPos() { return xPos->value(); }
     int getYPos() { return yPos->value(); }
-    int getAnimationSpeed() { return animationSpeed->value(); }
 public slots:
-    void setMaxDims(int rows, int cols) { this->setMaxX(cols); this->setMaxY(rows); }
+    void setMaxDims(int rows, int cols) { this->setMaxX(cols-1); this->setMaxY(rows-1); }
 private:
     QSpinBox *xPos;
     QSpinBox *yPos;
-    QSpinBox *animationSpeed;
 };
 
 class MapConfigInputDialog: public QDialog

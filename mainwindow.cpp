@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     });
     CoordinateInputDialog *dialog = new CoordinateInputDialog(0, 0, this);
     QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, mainView, this]() {
-        mainView->runPathfinder(dialog->getXPos(), dialog->getYPos(), dialog->getAnimationSpeed());
+        mainView->runPathfinder(dialog->getXPos(), dialog->getYPos());
         emit actionRunning(true);
     });
     QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, dialog, &CoordinateInputDialog::setMaxDims);
@@ -112,12 +112,6 @@ void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_2:
         controller->moveProtagonist(0, 1);
         break;
-    case Qt::Key_Plus:
-        controller->updateScale(1.f/2);
-        break;
-    case Qt::Key_Minus:
-        controller->updateScale(2);
-        break;
     case Qt::Key_F:
         controller->debugMode=!controller->debugMode;
         break;
@@ -131,9 +125,9 @@ void MainWindowCentralWidget::runStrategy()
     this->controller->playStrategy();
 }
 
-void MainWindowCentralWidget::runPathfinder(int targetX, int targetY, int animationSpeed)
+void MainWindowCentralWidget::runPathfinder(int targetX, int targetY)
 {
-    this->controller->doPathfinderSteps(targetX, targetY, animationSpeed);
+    this->controller->doPathfinderSteps(targetX, targetY);
 }
 
 void MainWindowCentralWidget::stopAction()
@@ -145,11 +139,37 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     :QWidget(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
-    QGraphicsView* graphicsView = new QGraphicsView(this);
+
+    // Scene
+    graphicsView = new QGraphicsView(this);
     layout->addWidget(graphicsView);
-    QGraphicsScene* scene = new QGraphicsScene(graphicsView);
-    controller = std::make_shared<WorldController>(scene);
+    QGraphicsScene *scene = new QGraphicsScene(graphicsView);
     graphicsView->setScene(scene);
+
+
+    // Controls panel
+    QHBoxLayout *controlsLayout = new QHBoxLayout;
+    layout->addLayout(controlsLayout);
+
+    QSlider *animationSpeed = new QSlider(Qt::Horizontal, this);
+    animationSpeed->setMinimum(1);
+    animationSpeed->setMaximum(100);
+    controlsLayout->addWidget(animationSpeed);
+
+    QObject::connect(animationSpeed, &QSlider::valueChanged, [this](int value) {
+        this->controller->updateAnimationSpeed(value);
+    });
+
+    QSlider *sceneScale = new QSlider(Qt::Horizontal, this);
+    sceneScale->setMinimum(1);
+    sceneScale->setMaximum(1000);
+    controlsLayout->addWidget(sceneScale);
+    QObject::connect(sceneScale, &QSlider::valueChanged, [this](int value) {
+        this->graphicsView->setTransform(QTransform::fromScale(value/100.f, value/100.f));
+    });
+
+    // Controller
+    controller = std::make_shared<WorldController>(graphicsView);
 }
 
 CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)
@@ -164,12 +184,8 @@ CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent
     yPos = new QSpinBox(this);
     yPos->setMinimum(0);
     yPos->setMaximum(maxY);
-    animationSpeed = new QSpinBox(this);
-    animationSpeed->setMinimum(0);
-    animationSpeed->setMaximum(1000);
     formLayout->addRow(new QLabel("x position:"), xPos);
     formLayout->addRow(new QLabel("y position:"), yPos);
-    formLayout->addRow(new QLabel("Animation speed:"), animationSpeed);
     mainLayout->addLayout(formLayout);
 
     QDialogButtonBox* dialogButtons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
