@@ -94,6 +94,8 @@ void MainWindowCentralWidget::createWorld(QString file, int enemies, int healthp
     });
     controller->render();
     emit worldLoaded(controller->getWorldModel()->tiles()->rows(), controller->getWorldModel()->tiles()->cols());
+    emit this->healthUpdated(this->controller->getWorldModel()->protagonist()->getHealth());
+    emit this->energyUpdated(this->controller->getWorldModel()->protagonist()->getEnergy());
 }
 
 void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
