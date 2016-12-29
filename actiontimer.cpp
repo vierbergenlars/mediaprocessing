@@ -40,6 +40,7 @@ void ActionTimer::connect(const BoolCallback callback, const VoidCallback destru
             this->disconnect();
         }
     });
+    emit activated(true);
     timer.start();
 }
 
@@ -50,5 +51,6 @@ void ActionTimer::disconnect()
     timer.disconnect();
     _destructor();
     _destructor = &empty;
+    emit activated(false);
 }
 

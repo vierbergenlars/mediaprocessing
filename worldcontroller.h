@@ -31,6 +31,7 @@ public:
     void stopTimer();
     void updateAnimationSpeed(int speed) { animationSpeed = speed; }
 
+    ActionTimer &getTimer();
 private:
     int animationSpeed = 1;
     int range;

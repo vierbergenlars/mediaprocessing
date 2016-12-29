@@ -128,6 +128,11 @@ void WorldController::stopTimer()
     actionTimer.disconnect();
 }
 
+ActionTimer& WorldController::getTimer()
+{
+    return actionTimer;
+}
+
 
 std::shared_ptr<WorldModel> WorldController::getWorldModel()
 {
