@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <set>
 #include <cmath>
-PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, Matrix<std::shared_ptr<WorldTile>>* matrix):
+PathFinder::PathFinder(int xstart, int ystart, int xend, int yend, std::shared_ptr<Matrix<std::shared_ptr<WorldTile> > > matrix):
     _xstart(xstart), _ystart(ystart), _xend(xend), _yend(yend),_matrix(matrix) ,statusMatrix(matrix->rows(), matrix->cols())
 {
     for(int i =0; i<statusMatrix.rows();i++){

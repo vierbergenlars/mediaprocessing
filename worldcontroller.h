@@ -5,7 +5,7 @@
 #include <memory>
 #include <world.h>
 #include <QString>
-#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QGraphicsPixmapItem>
 #include <deque>
 #include "worldtile.h"
@@ -14,34 +14,28 @@
 #include "strategy.h"
 #include <QTimer>
 #include "actiontimer.h"
-class PathFinder;
-
 class WorldController
 {
 public:
-    WorldController(QGraphicsScene*scene);
-    ~WorldController();
+    WorldController(QGraphicsView *view);
     void createWorld(QString world, int enemies, int healthpacks);
     void render();
     void moveProtagonist(int rows, int cols);
     bool debugMode = false;
-    void doPathfinderSteps(int xTarget, int yTarget, int timerLength = 100);
+    void doPathfinderSteps(int xTarget, int yTarget);
 
-    WorldModel* getWorldModel();
+    std::shared_ptr<WorldModel> getWorldModel();
     float getProtagonistEnergy();
     float getProtagonistHealth();
     void playStrategy();
     void stopTimer();
-    void updateScale(float scaleDiff);
+    void updateAnimationSpeed(int speed) { animationSpeed = speed; }
 
 private:
-    int scale;
+    int animationSpeed = 1;
     int range;
-    QGraphicsPixmapItem *backgroundImage;
-    QGraphicsScene *scene;
-    WorldModel *worldModel;
-    std::vector<GraphicsPosition*> positions;
-    GraphicsProtagonist* gprotagonist;
+    QGraphicsView *view;
+    std::shared_ptr<WorldModel> worldModel;
     ActionTimer actionTimer;
 };
 

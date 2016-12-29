@@ -120,9 +120,3 @@ void GraphicsPosition::update()
         poisonRect->setBrush(Qt::transparent);
     }
 }
-
-void GraphicsPosition::updateScale(float scale)
-{
-    this->setScale(scale);
-    this->setPos(tile->getX()*scale, tile->getY()*scale);
-}

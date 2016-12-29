@@ -17,34 +17,46 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
+    virtual ~MainWindow() {}
+signals:
+    void actionRunning(bool);
+};
+
+class MainWindowCentralWidget: public QWidget
+{
+    Q_OBJECT
+public:
+    explicit MainWindowCentralWidget(QWidget *parent = 0);
     void createWorld(QString file, int enemies, int healthpacks);
     virtual void keyPressEvent(QKeyEvent* event) override;
-    virtual ~MainWindow();
+    void runStrategy();
+    void runPathfinder(int targetX, int targetY);
+    void stopAction();
+    virtual ~MainWindowCentralWidget() = default;
 signals:
-    void worldLoaded(bool);
-    void actionRunning(bool);
+    void worldLoaded(int rows, int cols);
+    void healthUpdated(int health);
+    void energyUpdated(int energy);
 private:
-    WorldController *controller;
-    QGraphicsView mainView;
-    QProgressBar *energyBar;
-    QProgressBar *healthBar;
-    QToolBar *toolBar;
+    QGraphicsView *graphicsView;
+    std::shared_ptr<WorldController> controller;
 };
 
 class CoordinateInputDialog: public QDialog
 {
+    Q_OBJECT
 public:
     CoordinateInputDialog(int maxX, int maxY, QWidget *parent = nullptr);
     virtual ~CoordinateInputDialog() {}
-    int setMaxX(int x) { xPos->setMaximum(x);}
-    int setMaxY(int y) { yPos->setMaximum(y); }
+    void setMaxX(int x) { xPos->setMaximum(x);}
+    void setMaxY(int y) { yPos->setMaximum(y); }
     int getXPos() { return xPos->value(); }
     int getYPos() { return yPos->value(); }
-    int getAnimationSpeed() { return animationSpeed->value(); }
+public slots:
+    void setMaxDims(int rows, int cols) { this->setMaxX(cols-1); this->setMaxY(rows-1); }
 private:
     QSpinBox *xPos;
     QSpinBox *yPos;
-    QSpinBox *animationSpeed;
 };
 
 class MapConfigInputDialog: public QDialog
