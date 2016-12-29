@@ -19,8 +19,6 @@ public:
 
 private:
     WorldModel* _worldModel;
-    std::vector<std::shared_ptr<Enemy>> enemys;
-    std::vector<std::shared_ptr<WorldTile>> healtTiles;
     std::deque<Node> stepQue;
 
 
