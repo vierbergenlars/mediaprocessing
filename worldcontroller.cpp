@@ -35,6 +35,14 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
     for(std::unique_ptr<Tile> &tile: tilesList) {
         std::shared_ptr<WorldTile> wt = std::make_shared<WorldTile>(std::move(tile));
         tiles->set(wt->getY(), wt->getX(), wt);
+        QObject::connect(&*wt, &WorldTile::changed, [this, wt]() {
+            if(!wt->hasDrawable() || wt->graphicsConstructed)
+                return;
+            auto graphicsPos = new GraphicsPosition(wt);
+            graphicsPos->setPos(wt->getX(), wt->getY());
+            view->scene()->addItem(graphicsPos);
+            wt->graphicsConstructed = true;
+        });
     }
 
     auto enemiesList = world.getEnemies(enemies);
@@ -68,14 +76,6 @@ void WorldController::createWorld(QString file, int enemies, int healthpacks)
 
 void WorldController::render()
 {
-    for(std::shared_ptr<WorldTile> & t: *worldModel->tiles()) {
-        if(!t->hasDrawable() || t->graphicsConstructed)
-            continue;
-        auto graphicsPos = new GraphicsPosition(t);
-        graphicsPos->setPos(t->getX(), t->getY());
-        view->scene()->addItem(graphicsPos);
-        t->graphicsConstructed=true;
-    }
 }
 
 void WorldController::moveProtagonist(int x, int y)

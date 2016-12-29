@@ -13,8 +13,8 @@ void WorldTile::setEnemy(std::shared_ptr<Enemy> enemy)
 {
     assert(_enemy == nullptr);
     assert(enemy->getXPos() == getX() && enemy->getYPos() == getY());
-    std::shared_ptr<PEnemy> penemy = std::dynamic_pointer_cast<PEnemy>(enemy);
     _enemy = enemy;
+    emit changed();
 }
 
 void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
@@ -22,6 +22,7 @@ void WorldTile::setHealthpack(std::shared_ptr<Tile> healthpack)
     assert(_healthpack == 0);
     assert(healthpack->getXPos() == getX() && healthpack->getYPos() == getY());
     _healthpack = healthpack->getValue();
+    emit changed();
 }
 
 void WorldTile::setStatus(WorldTile::Status status)
