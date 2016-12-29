@@ -121,9 +121,6 @@ void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_2:
         controller->moveProtagonist(0, 1);
         break;
-    case Qt::Key_F:
-        controller->debugMode=!controller->debugMode;
-        break;
     }
 }
 

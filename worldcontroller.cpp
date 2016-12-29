@@ -138,13 +138,6 @@ std::shared_ptr<WorldModel> WorldController::getWorldModel()
 {
  return worldModel;
 }
-float WorldController::getProtagonistEnergy(){
-
-    return worldModel->protagonist()->getEnergy();
-}
-float WorldController::getProtagonistHealth(){
-    return worldModel->protagonist()->getHealth();
-}
 
 
 
