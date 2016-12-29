@@ -8,23 +8,23 @@
 #include <QStatusBar>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), mainView(this)
+    QMainWindow(parent)
 {
-    energyBar = new QProgressBar(&mainView);
+    QGraphicsView* graphicsView = new QGraphicsView(this);
+    energyBar = new QProgressBar(this);
     energyBar->setFormat("Energy: %v/%m");
     energyBar->setValue(0);
 
-    healthBar = new QProgressBar(&mainView);
+    healthBar = new QProgressBar(this);
     healthBar->setFormat("Health: %v/%m");
     healthBar->setValue(0);
     this->statusBar()->insertPermanentWidget(0, energyBar);
     this->statusBar()->insertPermanentWidget(1, healthBar);
-    this->setCentralWidget(&mainView);
-    mainView.show();
-    QGraphicsScene* scene = new QGraphicsScene(&mainView);
+    this->setCentralWidget(graphicsView);
+    QGraphicsScene* scene = new QGraphicsScene(graphicsView);
     controller = std::make_shared<WorldController>(scene);
-    mainView.setScene(scene);
-    toolBar = new QToolBar(this);
+    graphicsView->setScene(scene);
+    QToolBar* toolBar = new QToolBar(this);
     this->addToolBar(toolBar);
 
     QAction *openAction = new QAction("Open map...", this);

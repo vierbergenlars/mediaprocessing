@@ -25,10 +25,8 @@ signals:
     void actionRunning(bool);
 private:
     std::shared_ptr<WorldController> controller;
-    QGraphicsView mainView;
     QProgressBar *energyBar;
     QProgressBar *healthBar;
-    QToolBar *toolBar;
 };
 
 class CoordinateInputDialog: public QDialog
