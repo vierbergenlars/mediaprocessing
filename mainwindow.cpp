@@ -10,23 +10,24 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    QGraphicsView* graphicsView = new QGraphicsView(this);
-    energyBar = new QProgressBar(this);
-    energyBar->setFormat("Energy: %v/%m");
-    energyBar->setValue(0);
+    MainWindowCentralWidget* mainView = new MainWindowCentralWidget(this);
+    this->setCentralWidget(mainView);
 
-    healthBar = new QProgressBar(this);
+    // Energy & health bars
+    QProgressBar* energyBar = new QProgressBar(this);
+    energyBar->setFormat("Energy: %v/%m");
+    QObject::connect(mainView, &MainWindowCentralWidget::energyUpdated, energyBar, &QProgressBar::setValue);
+
+    QProgressBar* healthBar = new QProgressBar(this);
     healthBar->setFormat("Health: %v/%m");
-    healthBar->setValue(0);
+    QObject::connect(mainView, &MainWindowCentralWidget::healthUpdated, healthBar, &QProgressBar::setValue);
+
     this->statusBar()->insertPermanentWidget(0, energyBar);
     this->statusBar()->insertPermanentWidget(1, healthBar);
-    this->setCentralWidget(graphicsView);
-    QGraphicsScene* scene = new QGraphicsScene(graphicsView);
-    controller = std::make_shared<WorldController>(scene);
-    graphicsView->setScene(scene);
     QToolBar* toolBar = new QToolBar(this);
     this->addToolBar(toolBar);
 
+    // Map open action
     QAction *openAction = new QAction("Open map...", this);
     toolBar->addAction(openAction);
 
@@ -35,63 +36,61 @@ MainWindow::MainWindow(QWidget *parent) :
     MapConfigInputDialog *mapConfigDialog = new MapConfigInputDialog(this);
     QObject::connect(openAction, &QAction::triggered, mapSelectDialog, &QFileDialog::exec);
     QObject::connect(mapSelectDialog, &QFileDialog::accepted, mapConfigDialog, &MapConfigInputDialog::exec);
-    QObject::connect(mapConfigDialog, &MapConfigInputDialog::accepted, [mapSelectDialog, mapConfigDialog, this]() {
-        this->createWorld(mapSelectDialog->selectedFiles().value(0), mapConfigDialog->getEnemies(), mapConfigDialog->getHealthpacks());
-
+    QObject::connect(mapConfigDialog, &MapConfigInputDialog::accepted, [mapSelectDialog, mapConfigDialog, mainView]() {
+        mainView->createWorld(mapSelectDialog->selectedFiles().value(0), mapConfigDialog->getEnemies(), mapConfigDialog->getHealthpacks());
     });
 
+    // Run strategy action
     QAction *runAction = new QAction("Run strategy", this);
     toolBar->addAction(runAction);
-    QObject::connect(runAction, &QAction::triggered, [this]() {
-        this->controller->playStrategy();
-        emit actionRunning(true);
+    QObject::connect(runAction, &QAction::triggered, [mainView, this]() {
+        mainView->runStrategy();
+        emit this->actionRunning(true);
     });
-    QObject::connect(this, &MainWindow::worldLoaded, runAction, &QAction::setEnabled);
+    QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded,[runAction](int, int) {
+        runAction->setEnabled(true);
+    });
 
+    // Pathfinder action
     QAction *pathfindAction = new QAction("Run pathfinder...", this);
     toolBar->addAction(pathfindAction);
-
-    QObject::connect(this, &MainWindow::worldLoaded, pathfindAction, &QAction::setEnabled);
+    QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, [pathfindAction](int, int) {
+        pathfindAction->setEnabled(true);
+    });
     CoordinateInputDialog *dialog = new CoordinateInputDialog(0, 0, this);
-    QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, this]() {
-        this->controller->doPathfinderSteps(dialog->getXPos(), dialog->getYPos(), dialog->getAnimationSpeed());
+    QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, mainView, this]() {
+        mainView->runPathfinder(dialog->getXPos(), dialog->getYPos(), dialog->getAnimationSpeed());
         emit actionRunning(true);
     });
-    QObject::connect(pathfindAction, &QAction::triggered, [dialog, this]() {
-        dialog->setMaxY(this->controller->getWorldModel()->tiles()->rows()-1);
-        dialog->setMaxX(this->controller->getWorldModel()->tiles()->cols()-1);
-        dialog->exec();
-    });
+    QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, dialog, &CoordinateInputDialog::setMaxDims);
+    QObject::connect(pathfindAction, &QAction::triggered, dialog, &QDialog::exec);
 
+    // Stop action
     QAction *stopAction = new QAction("Stop", this);
     toolBar->addAction(stopAction);
-
-    QObject::connect(this, &MainWindow::worldLoaded, stopAction, &QAction::setEnabled);
     QObject::connect(this, &MainWindow::actionRunning, stopAction, &QAction::setEnabled);
-
-    QObject::connect(stopAction, &QAction::triggered, [this]() {
-        this->controller->stopTimer();
+    QObject::connect(stopAction, &QAction::triggered, [mainView, this]() {
+        mainView->stopAction();
         emit this->actionRunning(false);
     });
 
-    QObject::connect(this, &MainWindow::worldLoaded, [this]() {
+    QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, [this](int, int) {
         emit this->actionRunning(false);
     });
-    emit worldLoaded(false);
 }
 
-void MainWindow::createWorld(QString file, int enemies, int healthpacks)
+void MainWindowCentralWidget::createWorld(QString file, int enemies, int healthpacks)
 {
     controller->createWorld(file, enemies, healthpacks);
-    QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
-        this->healthBar->setValue(this->controller->getWorldModel()->protagonist()->getHealth());
-        this->energyBar->setValue(this->controller->getWorldModel()->protagonist()->getEnergy());
+    QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int, int) {
+        emit this->healthUpdated(this->controller->getWorldModel()->protagonist()->getHealth());
+        emit this->energyUpdated(this->controller->getWorldModel()->protagonist()->getEnergy());
     });
     controller->render();
-    emit worldLoaded(true);
+    emit worldLoaded(controller->getWorldModel()->tiles()->rows(), controller->getWorldModel()->tiles()->cols());
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
+void MainWindowCentralWidget::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key()) {
     default:
@@ -125,10 +124,32 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_P:
         controller->playStrategy();
     }
-    energyBar->setValue(controller->getProtagonistEnergy());
-    healthBar->setValue(controller->getProtagonistHealth());
+}
 
-    controller->render();
+void MainWindowCentralWidget::runStrategy()
+{
+    this->controller->playStrategy();
+}
+
+void MainWindowCentralWidget::runPathfinder(int targetX, int targetY, int animationSpeed)
+{
+    this->controller->doPathfinderSteps(targetX, targetY, animationSpeed);
+}
+
+void MainWindowCentralWidget::stopAction()
+{
+    this->controller->stopTimer();
+}
+
+MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
+    :QWidget(parent)
+{
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    QGraphicsView* graphicsView = new QGraphicsView(this);
+    layout->addWidget(graphicsView);
+    QGraphicsScene* scene = new QGraphicsScene(graphicsView);
+    controller = std::make_shared<WorldController>(scene);
+    graphicsView->setScene(scene);
 }
 
 CoordinateInputDialog::CoordinateInputDialog(int maxX, int maxY, QWidget *parent)
