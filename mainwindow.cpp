@@ -170,12 +170,13 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
         this->controller->updateAnimationSpeed(value);
     });
 
+    // Scene scale
     QSlider *sceneScale = new QSlider(Qt::Horizontal, this);
-    sceneScale->setMinimum(1);
+    sceneScale->setMinimum(0);
     sceneScale->setMaximum(1000);
     controlsLayout->addWidget(sceneScale);
     QObject::connect(sceneScale, &QSlider::valueChanged, [this](int value) {
-        this->graphicsView->setTransform(QTransform::fromScale(value/100.f, value/100.f));
+        this->graphicsView->setTransform(QTransform::fromScale(std::pow(2, value/100.f)/10.f, std::pow(2, value/100.f)/10.f));
     });
 
     // Heuristic weight
@@ -193,7 +194,7 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
 
     // Controls startup values
     animationSpeed->setValue(5);
-    sceneScale->setValue(1);
+    sceneScale->setValue(100);
     heuristicsWeight->setValue(10);
 }
 
