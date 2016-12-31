@@ -188,6 +188,14 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     // Disable adjusting heuristics weight when an action is running (it has no effect anyways)
     QObject::connect(&controller->getTimer(), &ActionTimer::activated, heuristicsWeight, &QSlider::setDisabled);
 
+    QObject::connect(this, &MainWindowCentralWidget::worldLoaded, [this]() {
+        // Keep window centered on protagonist
+        QObject::connect(&*controller->getWorldModel()->protagonist(), &Protagonist::posChanged, [this](int x, int y) {
+            graphicsView->centerOn(x, y);
+        });
+    });
+
+
 
     // Controls startup values
     animationSpeed->setValue(5);
