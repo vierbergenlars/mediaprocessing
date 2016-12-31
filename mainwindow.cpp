@@ -45,10 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Run strategy action
     QAction *runAction = new QAction("Run strategy", this);
     toolBar->addAction(runAction);
-    QObject::connect(runAction, &QAction::triggered, [mainView, this]() {
-        mainView->runStrategy();
-        emit this->actionRunning(true);
-    });
+    QObject::connect(runAction, &QAction::triggered, mainView, &MainWindowCentralWidget::runStrategy);
     QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded,[runAction](int, int) {
         runAction->setEnabled(true);
     });
@@ -62,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
     CoordinateInputDialog *dialog = new CoordinateInputDialog(0, 0, this);
     QObject::connect(dialog, &CoordinateInputDialog::accepted, [dialog, mainView, this]() {
         mainView->runPathfinder(dialog->getXPos(), dialog->getYPos());
-        emit actionRunning(true);
     });
     QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, dialog, &CoordinateInputDialog::setMaxDims);
     QObject::connect(pathfindAction, &QAction::triggered, dialog, &QDialog::exec);
@@ -70,15 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Stop action
     QAction *stopAction = new QAction("Stop", this);
     toolBar->addAction(stopAction);
-    QObject::connect(this, &MainWindow::actionRunning, stopAction, &QAction::setEnabled);
-    QObject::connect(stopAction, &QAction::triggered, [mainView, this]() {
-        mainView->stopAction();
-        emit this->actionRunning(false);
-    });
-
-    QObject::connect(mainView, &MainWindowCentralWidget::worldLoaded, [this](int, int) {
-        emit this->actionRunning(false);
-    });
+    QObject::connect(stopAction, &QAction::triggered, mainView, &MainWindowCentralWidget::stopAction);
 }
 
 void MainWindowCentralWidget::createWorld(QString file, int enemies, int healthpacks)

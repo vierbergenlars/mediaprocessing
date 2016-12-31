@@ -19,8 +19,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow() {}
-signals:
-    void actionRunning(bool);
 };
 
 class GraphicsView: public QGraphicsView
