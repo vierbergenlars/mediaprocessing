@@ -85,6 +85,10 @@ void WorldController::moveProtagonist(int x, int y)
 
 void WorldController::doPathfinderSteps(int xTarget, int yTarget, float heuristicsWeight)
 {
+    if(!worldModel->tiles()->contains(yTarget, xTarget)) {
+        qDebug() << "Sorry, I'm not going to venture outside the world.";
+        return;
+    }
     if(std::isinf(worldModel->tiles()->get(yTarget, xTarget)->getDifficulty())) {
         qDebug() << "Sorry, I'm not going to visit an unreachable tile.";
         return;
