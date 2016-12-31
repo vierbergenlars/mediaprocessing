@@ -146,13 +146,16 @@ MainWindowCentralWidget::MainWindowCentralWidget(QWidget *parent)
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     // Scene
-    graphicsView = new QGraphicsView(this);
+    graphicsView = new GraphicsView(this);
     layout->addWidget(graphicsView);
     QGraphicsScene *scene = new QGraphicsScene(graphicsView);
     graphicsView->setScene(scene);
 
     // Controller
     controller = std::make_shared<WorldController>(graphicsView);
+
+    // Run the pathfinder when a tile is pressed
+    QObject::connect(graphicsView, &GraphicsView::tilePressed, this, &MainWindowCentralWidget::runPathfinder);
 
     // Controls panel
     QFormLayout *controlsLayout = new QFormLayout;
@@ -245,4 +248,16 @@ MapConfigInputDialog::MapConfigInputDialog(QWidget *parent)
 
     connect(dialogButtons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(dialogButtons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+}
+
+void GraphicsView::mousePressEvent(QMouseEvent *event)
+{
+    // Mouse event coordinates are GraphicsView widget coordinates,
+    // they must be mapped to scene coordinates to be usefull in the world.
+    QPointF pos = mapToScene(event->pos());
+    int posX = std::floor(pos.x());
+    int posY = std::floor(pos.y());
+    if(posX > 0 && posX < scene()->width()  && posY > 0 && posY < scene()->height()) {
+        emit tilePressed(posX, posY);
+    }
 }

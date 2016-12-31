@@ -11,6 +11,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QSpinBox>
+#include <QMouseEvent>
 
 class MainWindow : public QMainWindow
 {
@@ -22,6 +23,18 @@ signals:
     void actionRunning(bool);
 };
 
+class GraphicsView: public QGraphicsView
+{
+    Q_OBJECT
+public:
+    GraphicsView(QWidget *parent = nullptr): QGraphicsView(parent) {}
+    virtual ~GraphicsView() = default;
+signals:
+    void tilePressed(int x, int y);
+protected:
+    virtual void mousePressEvent(QMouseEvent *event) override;
+};
+
 class MainWindowCentralWidget: public QWidget
 {
     Q_OBJECT
@@ -29,10 +42,11 @@ public:
     explicit MainWindowCentralWidget(QWidget *parent = 0);
     void createWorld(QString file, int enemies, int healthpacks);
     virtual void keyPressEvent(QKeyEvent* event) override;
-    void runStrategy();
-    void runPathfinder(int targetX, int targetY);
-    void stopAction();
     virtual ~MainWindowCentralWidget() = default;
+public slots:
+    void runStrategy();
+    void stopAction();
+    void runPathfinder(int targetX, int targetY);
 private slots:
     void setHeuristicsWeight(double weight) { heuristicsWeight = weight; }
 signals:
@@ -40,7 +54,7 @@ signals:
     void healthUpdated(int health);
     void energyUpdated(int energy);
 private:
-    QGraphicsView *graphicsView;
+    GraphicsView *graphicsView;
     std::shared_ptr<WorldController> controller;
     float heuristicsWeight = 1.f;
 };
